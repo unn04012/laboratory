@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "node -r ts-node/register --env-file=.env ./src",
+    "dev-transaction": "node -r ts-node/register --env-file=.env ./src/test-in-one-connection",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

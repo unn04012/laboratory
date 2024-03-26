@@ -8,10 +8,12 @@ import { dataSourceFactory, getDataSource } from './typeorm/connection-factory';
   await dataSourceFactory(getConfigModule('mysqlConfig'));
 
   const repo = getDataSource().getRepository(TitlesEntity);
-
+  const titles = await repo.find();
   console.time();
 
-  const titles = await repo.find();
+  const asyncTest = async () => {
+    const repo = getDataSource().getRepository(TitlesEntity);
+  };
 
   const promisedUpdates = titles.map(({ empNo, title, fromDate }) => repo.update({ empNo, title, fromDate }, { toDate: new Date() }));
 
