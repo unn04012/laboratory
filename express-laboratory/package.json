@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "node -r ts-node/register --env-file=.env ./src",
+    "dev": "node -r ts-node/register --env-file=.env ./src/start-server",
     "dev-transaction": "node -r ts-node/register --env-file=.env ./src/test-in-one-connection",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -14,9 +14,11 @@
   "dependencies": {
     "@types/express": "^4.17.21",
     "@types/node": "^20.11.30",
+    "@types/sse": "^0.0.0",
     "express": "^4.19.1",
     "mysql2": "^3.9.2",
     "reflect-metadata": "^0.2.1",
+    "sse": "^0.0.8",
     "ts-node": "^10.9.2",
     "typeorm": "^0.3.20",
     "typeorm-naming-strategies": "^4.1.0",
