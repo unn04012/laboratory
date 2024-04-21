@@ -15,7 +15,7 @@ export class ProductSchema {
     type: 'int',
     comment: '입고량',
   })
-  public receivStock: number;
+  public receiveStock: number;
 
   @Column({
     type: 'int',

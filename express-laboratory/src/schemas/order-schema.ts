@@ -14,6 +14,13 @@ export class OrderSchema {
 
   @Column({
     type: 'int',
+    default: 1,
+    comment: '주문 갯수',
+  })
+  public count: number;
+
+  @Column({
+    type: 'int',
     comment: '상품 id(pk)',
   })
   public productId: number;
