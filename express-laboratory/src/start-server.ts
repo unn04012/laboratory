@@ -1,5 +1,7 @@
 import express, { Express, Request, Response } from 'express';
 import SSE from 'sse';
+import { getConfigModule, initConfigModule } from './config';
+import { dataSourceFactory } from './typeorm/connection-factory';
 
 export function startServer() {
   const app: Express = express();
@@ -20,6 +22,9 @@ export function startServer() {
 }
 
 (async () => {
+  initConfigModule();
+
+  await dataSourceFactory(getConfigModule('mysqlConfig'));
   const app = startServer();
   const port = 4000;
 

@@ -2,7 +2,8 @@ import { DataSource } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 import { MysqlConfig } from '../config/config.mysql';
-import { TitlesEntity } from '../schemas/titles';
+import { OrderSchema } from '../schemas/order-schema';
+import { ProductSchema } from '../schemas/product-schema';
 
 let connection: DataSource | null = null;
 
@@ -16,8 +17,8 @@ export async function dataSourceFactory(config: MysqlConfig) {
     password,
     database,
     synchronize: false,
-    logging: true,
-    entities: [TitlesEntity],
+    logging: false,
+    entities: [ProductSchema, OrderSchema],
     poolSize: connectionLimit,
     namingStrategy: new SnakeNamingStrategy(),
   });
