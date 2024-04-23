@@ -1,10 +1,18 @@
 import express, { Express, Request, Response } from 'express';
 import SSE from 'sse';
 import { getConfigModule, initConfigModule } from './config';
+import { finalErrorHandler } from './errors/error-handler';
+import { initRepositores } from './init-repository';
+import { initProductOrderRouter } from './product/product-order.router';
 import { dataSourceFactory } from './typeorm/connection-factory';
 
 export function startServer() {
   const app: Express = express();
+
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+
+  app.use('/product', initProductOrderRouter());
 
   app.get('/', (req: Request, res: Response) => {
     res.send('Typescript + Node.js + Express Server');
@@ -18,6 +26,8 @@ export function startServer() {
     res.sendFile(__dirname + '/views/sse.html');
   });
 
+  app.use(finalErrorHandler());
+
   return app;
 }
 
@@ -25,7 +35,9 @@ export function startServer() {
   initConfigModule();
 
   await dataSourceFactory(getConfigModule('mysqlConfig'));
+  initRepositores();
   const app = startServer();
+
   const port = 4000;
 
   const server = app.listen(port, () => {

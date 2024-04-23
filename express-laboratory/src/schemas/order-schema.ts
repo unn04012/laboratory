@@ -7,6 +7,12 @@ export class OrderSchema {
   public id: number;
 
   @Column({
+    length: 50,
+    comment: 'userId(uuid)',
+  })
+  public userId: string;
+
+  @Column({
     length: 100,
     unique: true,
   })
