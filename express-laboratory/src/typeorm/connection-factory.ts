@@ -17,7 +17,7 @@ export async function dataSourceFactory(config: MysqlConfig) {
     password,
     database,
     synchronize: false,
-    logging: false,
+    logging: true,
     entities: [ProductSchema, OrderSchema],
     poolSize: connectionLimit,
     namingStrategy: new SnakeNamingStrategy(),

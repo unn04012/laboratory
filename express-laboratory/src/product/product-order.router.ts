@@ -18,7 +18,7 @@ export function initProductOrderRouter() {
       const { productId } = req.body;
       const userId = v4();
 
-      await service.order(productId, userId);
+      await service.orderWithPemesssticLock(productId, userId);
       res.json({});
     })
   );

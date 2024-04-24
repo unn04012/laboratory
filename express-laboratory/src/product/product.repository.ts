@@ -1,4 +1,4 @@
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, QueryRunner, Repository } from 'typeorm';
 import { ProductSchema } from '../schemas/product-schema';
 
 export class ProductRepository {
@@ -19,6 +19,32 @@ export class ProductRepository {
     const repo = this._getRepo(mgr);
 
     await repo.update({ id }, partial);
+  }
+
+  public async findOneQueryBuilderBy(queryRunner?: QueryRunner) {
+    const repo = this._getRepo();
+    const qr = repo.createQueryBuilder('product', queryRunner);
+
+    return {
+      async id(productId: number, lock?: 'pessimistic_read' | 'pessimistic_write') {
+        const found = qr.where('id =:productId', { productId });
+
+        if (lock) qr.setLock(lock);
+
+        return await found.getOne();
+      },
+    };
+  }
+
+  public updateBy(queryRunner?: QueryRunner) {
+    const repo = this._getRepo();
+    const qr = repo.createQueryBuilder('product', queryRunner);
+
+    return {
+      async idOfRemainStock(productId: number, remainStock: number) {
+        await qr.update().set({ remainStock }).where('id =:productId', { productId }).execute();
+      },
+    };
   }
 
   private _getRepo(mgr?: EntityManager) {

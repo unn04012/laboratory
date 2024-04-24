@@ -1,4 +1,4 @@
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, QueryRunner, Repository } from 'typeorm';
 import { OrderSchema } from '../schemas/order-schema';
 import { ProductSchema } from '../schemas/product-schema';
 
@@ -16,6 +16,14 @@ export class OrderRepository {
     const repo = this._getRepo(mgr);
     const created = await repo.save(param);
     return created;
+  }
+
+  public async createOrderWithQr(param: CreateOrderParam, qr?: QueryRunner) {
+    const repo = this._getRepo();
+
+    const qb = repo.createQueryBuilder('order', qr);
+
+    await qb.insert().into(OrderSchema).values(param).execute();
   }
 
   private _getRepo(mgr?: EntityManager) {
