@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn, VersionColumn } from 'typeorm';
 import { OrderSchema } from './order-schema';
 
 @Entity('product')
@@ -27,6 +27,9 @@ export class ProductSchema {
     type: 'timestamp',
   })
   public regDate: Date;
+
+  @VersionColumn()
+  public version: number;
 
   @OneToMany(() => OrderSchema, (schema) => schema.product)
   orders: OrderSchema[];

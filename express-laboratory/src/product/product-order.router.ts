@@ -23,5 +23,16 @@ export function initProductOrderRouter() {
     })
   );
 
+  router.post(
+    '/optimistic-lock',
+    wrapAsync(async (req, res, next) => {
+      const { productId } = req.body;
+      const userId = v4();
+
+      await service.orderWithOptimisticLock(productId, userId);
+      res.json({});
+    })
+  );
+
   return router;
 }

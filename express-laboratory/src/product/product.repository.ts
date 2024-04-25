@@ -1,4 +1,4 @@
-import { EntityManager, QueryRunner, Repository } from 'typeorm';
+import { EntityManager, OptimisticLockVersionMismatchError, QueryRunner, Repository } from 'typeorm';
 import { ProductSchema } from '../schemas/product-schema';
 
 export class ProductRepository {
@@ -17,8 +17,16 @@ export class ProductRepository {
 
   public async updatePartialById(id: number, partial: Partial<ProductSchema>, mgr?: EntityManager) {
     const repo = this._getRepo(mgr);
+    const entity = repo.create({ id, ...partial });
 
-    await repo.update({ id }, partial);
+    await repo.save(entity);
+  }
+
+  public async updateBySchemaWithOptimisticLock(product: ProductSchema, mgr?: EntityManager) {
+    const repo = this._getRepo(mgr);
+
+    const updateResult = await repo.update({ id: product.id, version: product.version }, { ...product, version: product.version + 1 });
+    if (updateResult.affected === 0) throw new OptimisticLockVersionMismatchError('version mistach', product.version + 1, product.version);
   }
 
   public async findOneQueryBuilderBy(queryRunner?: QueryRunner) {

@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid';
+import { OptimisticLockVersionMismatchError } from 'typeorm';
 import { getDataSource } from '../typeorm/connection-factory';
 import { OrderRepository } from './order.repository';
 import { ProductRepository } from './product.repository';
@@ -11,8 +12,6 @@ export class ProductOrderService {
     return await getDataSource().transaction('SERIALIZABLE', async (mgr) => {
       const product = await this._productRepository.findOneBy(mgr).id(productId);
       if (!product) throw new NotFoundProductOrder('not found product');
-
-      console.log(userId, product.remainStock);
 
       if (product.remainStock <= 0) throw new ProductNotRemainStock(`cannot buy product, remainStock: ${product.receiveStock}`);
 
@@ -44,5 +43,25 @@ export class ProductOrderService {
     } finally {
       await qr.release();
     }
+  }
+
+  public async orderWithOptimisticLock(productId: number, userId: string) {
+    return await getDataSource().transaction(async (mgr) => {
+      const product = await this._productRepository.findOneBy(mgr).id(productId);
+      if (!product) throw new NotFoundProductOrder('not found product');
+
+      if (product.remainStock <= 0) throw new ProductNotRemainStock(`cannot buy product, remainStock: ${product.remainStock}`);
+
+      const updatedProduct = {
+        ...product,
+        remainStock: product.remainStock - 1,
+      };
+
+      await this._productRepository.updateBySchemaWithOptimisticLock(updatedProduct, mgr);
+
+      const order = await this._orderRepository.createOrder({ productId, userId, orderId: nanoid(), count: 1 }, mgr);
+
+      return order;
+    });
   }
 }
