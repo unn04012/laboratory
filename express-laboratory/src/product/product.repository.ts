@@ -55,6 +55,11 @@ export class ProductRepository {
     };
   }
 
+  public async sleep(delay: number, mgr?: EntityManager) {
+    const repo = this._getRepo(mgr);
+    await repo.query(`SELECT SLEEP(${delay})`);
+  }
+
   private _getRepo(mgr?: EntityManager) {
     return mgr ? mgr.getRepository(ProductSchema) : this._repo;
   }
