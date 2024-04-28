@@ -25,7 +25,7 @@ describe('promise all 쿼리 테스트', () => {
     expect(elapsedTime).toBeCloseTo(3, 1);
   });
 
-  test.only('하나의 트랜잭션에서는 promise.all이 병렬로 처리되지 않고 순차적으로 처리된다.', async () => {
+  test('하나의 트랜잭션에서는 promise.all이 병렬로 처리되지 않고 순차적으로 처리된다.', async () => {
     const productRepo = getRepository().product();
 
     const service = new DatabaseQueryService(productRepo);
