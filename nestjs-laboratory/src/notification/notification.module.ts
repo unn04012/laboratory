@@ -1,5 +1,5 @@
-import EventEmitter2 from 'eventemitter2';
 import { Module } from '@nestjs/common';
+import { NotificationServiceSlack } from './notification.service';
 
-@Module({ imports: [EventEmitter2] })
+@Module({ providers: [NotificationServiceSlack] })
 export class NotificationModule {}
