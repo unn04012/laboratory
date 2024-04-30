@@ -1,12 +1,18 @@
+import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { OrderCreateEvent } from '../common/order-create-event';
 
+@Injectable()
 export class NotificationServiceSlack {
   constructor() {}
 
-  @OnEvent(OrderCreateEvent.Topic(), { async: true })
-  public async orderCreated() {
-    console.log('hello world');
-    console.log('notification slack');
+  @OnEvent(OrderCreateEvent.Topic(), { promisify: true })
+  public async orderCreated(data: any) {
+    return new Promise((resolve) => setTimeout(() => resolve(data), 1000));
+  }
+
+  @OnEvent(OrderCreateEvent.Topic(), { promisify: true })
+  public async orderCreatedTwoSecondsDelay(data: any) {
+    return new Promise((resolve) => setTimeout(() => resolve(data), 2000));
   }
 }

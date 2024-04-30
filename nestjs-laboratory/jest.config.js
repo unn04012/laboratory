@@ -4,4 +4,5 @@ module.exports = {
   testEnvironment: 'node',
   testPathIgnorePatterns: ['/__testutils__/'],
   testMatch: ['**/?(*.)+(test).ts?(x)'],
+  testTimeout: 100000,
 };

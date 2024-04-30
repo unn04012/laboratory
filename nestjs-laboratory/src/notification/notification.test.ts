@@ -13,15 +13,7 @@ describe('notification slack test', () => {
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
       imports: [EventEmitterModule.forRoot()],
-      providers: [
-        NotificationServiceSlack,
-        // {
-        //   provide: EventEmitter2,
-        //   useValue: {
-        //     emit: jest.fn(),
-        //   },
-        // },
-      ],
+      providers: [NotificationServiceSlack],
     }).compile();
     app.createNestApplication();
     await app.init();
@@ -31,11 +23,28 @@ describe('notification slack test', () => {
   });
 
   test('OrderCreatd 이벤트가 발생할 때 메서드가 호출이 되어야 한다.', async () => {
-    // const mockedMethod = jest.spyOn(notificationService, 'orderCreated');
+    const mockedMethod = jest.spyOn(notificationService, 'orderCreated');
 
-    const eventData = {};
-    eventEmitter.emit(OrderCreateEvent.Topic(), eventData);
+    const eventData = 'hello world';
 
-    // expect(mockedMethod).toHaveBeenCalled();
+    await eventEmitter.emitAsync(OrderCreateEvent.Topic(), eventData);
+
+    expect(mockedMethod).toHaveBeenCalled();
+    expect(mockedMethod).toHaveBeenCalledWith(eventData);
+  });
+
+  test('OrderCreatd 이벤트가 발생할 때 비동기로 호출할 emitAsync할 경우 모두 끝날때까지 기다린다.', async () => {
+    const mockedMethod = jest.spyOn(notificationService, 'orderCreated');
+    const mockedMethod2 = jest.spyOn(notificationService, 'orderCreatedTwoSecondsDelay');
+
+    const eventData = 'hello world';
+    const startTime = performance.now();
+    await eventEmitter.emitAsync(OrderCreateEvent.Topic(), eventData);
+    const endTime = performance.now();
+
+    console.log((endTime - startTime) / 1000);
+
+    expect(mockedMethod).toHaveBeenCalled();
+    expect(mockedMethod2).toHaveBeenCalledWith(eventData);
   });
 });
