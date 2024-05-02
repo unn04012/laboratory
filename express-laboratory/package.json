@@ -21,7 +21,7 @@
     "express": "^4.19.1",
     "mysql2": "^3.9.2",
     "nanoid": "^3.3.4",
-    "reflect-metadata": "^0.2.1",
+    "reflect-metadata": "^0.2.2",
     "sse": "^0.0.8",
     "ts-node": "^10.9.2",
     "typeorm": "^0.3.20",

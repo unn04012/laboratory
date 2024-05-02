@@ -1,8 +1,10 @@
 import express, { Express, Request, Response } from 'express';
 import SSE from 'sse';
+import { registerRoutes } from './common/router-factory';
 import { getConfigModule, initConfigModule } from './config';
 import { finalErrorHandler } from './errors/error-handler';
 import { initRepositores } from './init-repository';
+import { ProductOrderController } from './product/product-order.controller';
 import { initProductOrderRouter } from './product/product-order.router';
 import { dataSourceFactory } from './typeorm/connection-factory';
 
@@ -12,7 +14,9 @@ export function startServer() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  app.use('/product', initProductOrderRouter());
+  registerRoutes(app, [ProductOrderController]);
+
+  // app.use('/product', initProductOrderRouter());
 
   app.get('/', (req: Request, res: Response) => {
     res.send('Typescript + Node.js + Express Server');
