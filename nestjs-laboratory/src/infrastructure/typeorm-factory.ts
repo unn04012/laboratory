@@ -32,10 +32,10 @@ export function dataSourceOptionsFactory(config: MySQLConfig): DataSourceOptions
     password,
     database,
     poolSize: connectionLimit,
-    synchronize: false,
+    synchronize: true,
     entities: getAllTypeOrmModels(),
     namingStrategy: new SnakeNamingStrategy(),
-    logging: false,
+    logging: true,
   };
 }
 
