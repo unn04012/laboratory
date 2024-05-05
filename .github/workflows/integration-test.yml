@@ -10,21 +10,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Cache node modules
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
       - name: Setup Docker
         uses: docker/setup-docker@v2
         with:
           docker-version: '20.10.8' # Docker 버전을 지정합니다.
+      - name: Change directory and install dependencies
+        run: |
+        cd ./nestjs-laboratory
       - name: Install NPM dependencies
         run: npm install
       - name: Runs integration test suites
