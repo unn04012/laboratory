@@ -1,35 +1,20 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { MySqlContainer, StartedMySqlContainer } from '@testcontainers/mysql';
+import supertest from 'supertest';
+
+import { Test } from '@nestjs/testing';
+import { StartedMySqlContainer } from '@testcontainers/mysql';
 import { ConfigModule } from '../../config/config.module';
 import { MySQLConfig } from '../../config/config.mysql';
-import { dataSourceFactory, dataSourceOptionsFactory } from '../../infrastructure/typeorm-factory';
-import { ProductController } from '../product.controller';
 import { ProductModule } from '../product.module';
-import { ProductService } from '../product.service';
-import { OrderRepository } from '../repository/order.repository';
-import { ProductRepository } from '../repository/product.repository';
+import { INestApplication } from '@nestjs/common';
+import { initMysqlContainer, mockMysqlConfigFactory, MockTypeormModule } from '../../test/mysql-environment';
 
-function mockMysqlConfigFactory({ user, password, database, port, host }): MySQLConfig {
-  return <MySQLConfig>{
-    user,
-    password,
-    database,
-    port,
-    connectionLimit: 5,
-    host,
-  };
-}
-
-async function initMysql() {
-  return await new MySqlContainer().withUsername('user').withUserPassword('password').withDatabase('database').start();
-}
 describe('productModule 통합 테스트를 위한 테스트', () => {
   let mysqlContainer: StartedMySqlContainer;
   let mysqlConfig: MySQLConfig;
+  let app: INestApplication;
 
   beforeAll(async () => {
-    mysqlContainer = await initMysql();
+    mysqlContainer = await initMysqlContainer();
 
     const port = mysqlContainer.getPort();
     const host = mysqlContainer.getHost();
@@ -39,25 +24,18 @@ describe('productModule 통합 테스트를 위한 테스트', () => {
 
     const mockMysqlConfig = mockMysqlConfigFactory({ port, host, user, database, password });
 
-    const app: TestingModule = await Test.createTestingModule({
-      imports: [
-        ConfigModule,
-        TypeOrmModule.forRootAsync({
-          imports: [ConfigModule],
-          inject: [MySQLConfig],
-          useFactory: dataSourceOptionsFactory,
-          dataSourceFactory: dataSourceFactory,
-        }),
-        ProductModule,
-      ],
-      // controllers: [ProductController],
-      // providers: [ProductService, ProductRepository, OrderRepository],
+    const module = await Test.createTestingModule({
+      imports: [ConfigModule, MockTypeormModule(), ProductModule],
     })
       .overrideProvider(MySQLConfig)
       .useValue(mockMysqlConfig)
       .compile();
 
-    mysqlConfig = app.get(MySQLConfig);
+    mysqlConfig = module.get(MySQLConfig);
+
+    app = module.createNestApplication();
+
+    await app.init();
   });
 
   afterAll(async () => {
@@ -67,13 +45,14 @@ describe('productModule 통합 테스트를 위한 테스트', () => {
   test('mysql conatiner가 성공적으로 띄어져야 한다.', async () => {
     const { user, password, database } = mysqlConfig;
 
-    // const container = await new MySqlContainer().withUsername(user).withUserPassword(password).withDatabase(database).start();
-    // console.log(container.getPort());
-
     expect(mysqlContainer.getConnectionUri()).toEqual(
       `mysql://${user}:${password}@${mysqlContainer.getHost()}:${mysqlContainer.getPort()}/${database}`,
     );
+  });
 
-    // await container.stop();
+  test('GET /product/:id', async () => {
+    const response = await supertest(app.getHttpServer()).get('/product/1').expect(200);
+
+    expect(response.body).toMatchObject({});
   });
 });
