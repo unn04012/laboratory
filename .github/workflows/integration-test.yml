@@ -16,7 +16,7 @@ jobs:
           docker-version: '20.10.8' # Docker 버전을 지정합니다.
       - name: Change directory and install dependencies
         run: |
-        cd ./nestjs-laboratory
+          cd ./nestjs-laboratory
       - name: Install NPM dependencies
         run: npm install
       - name: Runs integration test suites
