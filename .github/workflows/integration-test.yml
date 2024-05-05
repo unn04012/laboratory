@@ -14,6 +14,6 @@ jobs:
         run: |
           cd ./nestjs-laboratory
       - name: Install NPM dependencies
-        run: npm install
+        run: cd ./nestjs-laboratory && npm install
       - name: Runs integration test suites
-        run: npm run test product.module
+        run: cd ./nestjs-laboratory && npm run test product.module
