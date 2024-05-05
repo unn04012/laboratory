@@ -10,10 +10,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Setup Docker
-        uses: docker/setup-docker@v2
-        with:
-          docker-version: '20.10.8' # Docker 버전을 지정합니다.
       - name: Change directory and install dependencies
         run: |
           cd ./nestjs-laboratory
