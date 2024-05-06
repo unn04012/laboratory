@@ -21,11 +21,14 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.569.0",
+    "@aws-sdk/client-sqs": "^3.569.0",
     "@nestjs/common": "^9.4.3",
     "@nestjs/core": "^9.4.3",
     "@nestjs/event-emitter": "^2.0.4",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/typeorm": "^10.0.2",
+    "@ssut/nestjs-sqs": "^2.2.0",
     "mysql2": "^3.9.7",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
@@ -36,6 +39,7 @@
     "@nestjs/cli": "^9.0.0",
     "@nestjs/schematics": "^9.0.0",
     "@nestjs/testing": "^9.0.0",
+    "@testcontainers/localstack": "^10.9.0",
     "@testcontainers/mysql": "^10.9.0",
     "@types/express": "^4.17.13",
     "@types/jest": "29.5.0",

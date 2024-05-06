@@ -11,7 +11,7 @@ export class NotificationServiceSlack {
     return new Promise((resolve) => setTimeout(() => resolve(data), 1000));
   }
 
-  @OnEvent(OrderCreateEvent.Topic(), { promisify: true })
+  @OnEvent(OrderCreateEvent.Topic(), { async: true, promisify: true })
   public async orderCreatedTwoSecondsDelay(data: any) {
     return new Promise((resolve) => setTimeout(() => resolve(data), 2000));
   }

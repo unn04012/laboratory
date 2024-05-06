@@ -1,0 +1,106 @@
+{
+  "numFailedTestSuites": 0,
+  "numFailedTests": 0,
+  "numPassedTestSuites": 2,
+  "numPassedTests": 4,
+  "numPendingTestSuites": 0,
+  "numPendingTests": 0,
+  "numRuntimeErrorTestSuites": 0,
+  "numTodoTests": 0,
+  "numTotalTestSuites": 2,
+  "numTotalTests": 4,
+  "openHandles": [],
+  "snapshot": {
+    "added": 0,
+    "didUpdate": false,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0
+  },
+  "startTime": 1714902742638,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["notification slack test"],
+          "duration": 2134,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "notification slack test OrderCreatd 이벤트가 발생할 때 메서드가 호출이 되어야 한다.",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 2,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "OrderCreatd 이벤트가 발생할 때 메서드가 호출이 되어야 한다."
+        },
+        {
+          "ancestorTitles": ["notification slack test"],
+          "duration": 2014,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "notification slack test OrderCreatd 이벤트가 발생할 때 비동기로 호출할 emitAsync할 경우 모두 끝날때까지 기다린다.",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 2,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "OrderCreatd 이벤트가 발생할 때 비동기로 호출할 emitAsync할 경우 모두 끝날때까지 기다린다."
+        }
+      ],
+      "endTime": 1714902748722,
+      "message": "",
+      "name": "/Users/unn04012/Documents/laboratory/nestjs-laboratory/src/notification/notification.test.ts",
+      "startTime": 1714902742780,
+      "status": "passed",
+      "summary": ""
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["productModule 통합 테스트를 위한 테스트"],
+          "duration": 5,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "productModule 통합 테스트를 위한 테스트 mysql conatiner가 성공적으로 띄어져야 한다.",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "mysql conatiner가 성공적으로 띄어져야 한다."
+        },
+        {
+          "ancestorTitles": ["productModule 통합 테스트를 위한 테스트"],
+          "duration": 16,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "productModule 통합 테스트를 위한 테스트 GET /product/:id",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 1,
+          "retryReasons": [],
+          "status": "passed",
+          "title": "GET /product/:id"
+        }
+      ],
+      "endTime": 1714902758279,
+      "message": "",
+      "name": "/Users/unn04012/Documents/laboratory/nestjs-laboratory/src/product/__test__/product.module.integration.test.ts",
+      "startTime": 1714902742780,
+      "status": "passed",
+      "summary": ""
+    }
+  ],
+  "wasInterrupted": false
+}
