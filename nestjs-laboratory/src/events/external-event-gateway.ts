@@ -4,15 +4,16 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { SqsMessageHandler } from '@ssut/nestjs-sqs';
 import { OrderCreateEvent } from '../common';
 
-const getQueueNameDirectly = () => <string>process.env['EVENT_QUEUE_NAME'];
-
+const getQueueNameDirectly = () => <string>process.env['SQS_QUEUE_NAME'];
+console.log(getQueueNameDirectly());
 @Injectable()
 export class ExternalEventGatewayService {
   constructor(@Inject(EventEmitter2) private readonly _eventEmitter: EventEmitter2) {}
 
   @SqsMessageHandler(getQueueNameDirectly(), false)
   public async onExternalMessageArrival(message: SQS.Message) {
-    console.log('sqs message arrive');
+    console.log('sqs message arrival');
+
     this._parseAndPublishInternal(message);
   }
 

@@ -6,7 +6,7 @@ import { OrderCreateEvent } from '../common/order-create-event';
 export class NotificationServiceSlack {
   constructor() {}
 
-  @OnEvent(OrderCreateEvent.Topic(), { promisify: true })
+  @OnEvent(OrderCreateEvent.Topic(), { async: true, promisify: true })
   public async orderCreated(data: any) {
     return new Promise((resolve) => setTimeout(() => resolve(data), 1000));
   }

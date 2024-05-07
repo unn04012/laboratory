@@ -9,6 +9,7 @@ import { ConfigModule } from './config/config.module';
 import { MySQLConfig } from './config/config.mysql';
 import { dataSourceFactory, dataSourceOptionsFactory } from './infrastructure/typeorm-factory';
 import { ProductModule } from './product/product.module';
+import { EventModule } from './events/event.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ProductModule } from './product/product.module';
       dataSourceFactory: dataSourceFactory,
     }),
     ProductModule,
+    EventModule,
   ],
   controllers: [AppController],
   providers: [AppService],

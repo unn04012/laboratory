@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { Symbols } from '../symbols';
 import { ConfigReader } from './config-reader';
+import { AwsSQSConfig } from './config.aws-sqs';
 import { MySQLConfig } from './config.mysql';
 
 @Module({
@@ -10,7 +11,8 @@ import { MySQLConfig } from './config.mysql';
       useClass: ConfigReader,
     },
     MySQLConfig,
+    AwsSQSConfig,
   ],
-  exports: [MySQLConfig],
+  exports: [MySQLConfig, AwsSQSConfig],
 })
 export class ConfigModule {}

@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.569.0",
-    "@aws-sdk/client-sqs": "^3.569.0",
+    "@aws-sdk/client-sqs": "^3.398.0",
     "@nestjs/common": "^9.4.3",
     "@nestjs/core": "^9.4.3",
     "@nestjs/event-emitter": "^2.0.4",
