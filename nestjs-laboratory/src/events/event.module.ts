@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { ConsoleLogger, Module } from '@nestjs/common';
 import { SqsModule } from '@ssut/nestjs-sqs';
 import { SqsOptions, SqsConsumerOptions } from '@ssut/nestjs-sqs/dist/sqs.types';
 
@@ -12,7 +12,7 @@ export function sqsConfigurationFactory(queueConfig: AwsSQSConfig): SqsOptions {
     queueUrl: queueConfig.queueUrl,
     region: 'ap-northeast-2',
   };
-
+  console.log(consumerOpt);
   return {
     consumers: [consumerOpt],
   };

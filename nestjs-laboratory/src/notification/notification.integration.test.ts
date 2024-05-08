@@ -43,7 +43,6 @@ describe('notification module test', () => {
       queueName,
       queueUrl,
     };
-    console.log(sqsQueue);
 
     const module = await Test.createTestingModule({
       imports: [
@@ -61,6 +60,8 @@ describe('notification module test', () => {
       .overrideProvider(AwsSQSConfig)
       .useValue(sqsQueue)
       .compile();
+    const app = module.createNestApplication();
+    await app.init();
 
     eventGatewayService = module.get(ExternalEventGatewayService);
   });
