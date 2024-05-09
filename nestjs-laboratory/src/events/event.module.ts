@@ -12,7 +12,7 @@ export function sqsConfigurationFactory(queueConfig: AwsSQSConfig): SqsOptions {
     queueUrl: queueConfig.queueUrl,
     region: 'ap-northeast-2',
   };
-  console.log(consumerOpt);
+
   return {
     consumers: [consumerOpt],
   };
