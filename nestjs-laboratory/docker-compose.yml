@@ -15,3 +15,18 @@ services:
       - './src/test/init-aws/create-sqs-queue.sh:/etc/localstack/init/ready.d/init-aws.sh' # ready hook
       - '${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack'
       - '/var/run/docker.sock:/var/run/docker.sock'
+  mysql:
+    platform: linux/amd64
+    image: 'mysql:8.0'
+    container_name: mysql
+    volumes:
+      - ./src/test/init-environment/mysql:/etc/mysql/conf.d
+    environment:
+      - MYSQL_ROOT_PASSWORD=1234
+      - MYSQL_DATABASE=test_db
+      - MYSQL_USER=test
+      - MYSQL_PASSWORD=test_pass
+    ports:
+      - '33060:3306'
+    networks:
+      - bridge
