@@ -17,3 +17,27 @@ jobs:
         run: cd ./nestjs-laboratory && npm install
       - name: Runs integration test suites
         run: cd ./nestjs-laboratory && npm run test product.module
+      - name: Notify on SUCCESS
+              if: ${{ success() }}
+              uses: rtCamp/action-slack-notify@v2
+              env:
+                SLACK_COLOR: ${{ job.status }}
+                SLACK_ICON: https://github.com/rtCamp.png?size=48
+                SLACK_MESSAGE: 'Success integration test'
+                SLACK_TITLE: ✅ Success integration test
+                SLACK_USERNAME: ${{ github.repository }}
+                SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+            - name: Notify on FAILURE
+              if: ${{ failure() }}
+              uses: rtCamp/action-slack-notify@v2
+              env:
+                SLACK_COLOR: ${{ job.status }}
+                SLACK_ICON: https://github.com/rtCamp.png?size=48
+                SLACK_MESSAGE: 'FAIL integration test'
+                SLACK_TITLE: ❌ Fail integration test
+                SLACK_USERNAME: ${{ github.repository }}
+                SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
+            - name: Stop containers
+              if: always()
+              run: docker-compose -f "docker-compose.yml" down
