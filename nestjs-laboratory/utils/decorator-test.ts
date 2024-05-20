@@ -21,3 +21,4 @@ class A {
   @logging
   public log() {}
 }
+const a = new A();

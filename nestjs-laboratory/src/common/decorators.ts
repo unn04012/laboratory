@@ -1,7 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { DECORATORS } from '@nestjs/swagger/dist/constants';
-import { ExamplesObject, ReferenceObject, SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
+import { ContentObject, ExamplesObject, ReferenceObject, SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 
 export type HttpStatusCode = 400 | 404;
 
@@ -9,6 +9,22 @@ export type ErrorResponse = {
   errorCode?: string;
   description?: string;
   type: Function;
+};
+
+type GrouppedMetadata = {
+  [x: number]: {
+    content: {
+      'application/json': {
+        examples: ExamplesObject;
+        schema: {
+          oneOf: (ReferenceObject | SchemaObject)[];
+        };
+      };
+    };
+    type: undefined;
+    isArray: undefined;
+    description: string;
+  };
 };
 
 export function ApiErrorResponse(statusCode: HttpStatusCode, ...dtos: ErrorResponse[]) {
@@ -47,22 +63,28 @@ export function ApiErrorResponseV2(statusCode: HttpStatusCode, ...dtos: ErrorRes
       },
     },
   };
-
-  const groupedMetadata = {
+  console.log(123, content);
+  const groupedMetadata: GrouppedMetadata = {
     [statusCode]: {
       content,
       type: undefined,
       isArray: undefined,
       description: '',
     },
-    // status: statusCode,
   };
-  //   console.log(groupedMetadata);
 
   return (target: any, key?: string | symbol, descriptor?: TypedPropertyDescriptor<any>) => {
     if (descriptor) {
-      const classTarget = Reflect.getMetadata(DECORATORS.API_RESPONSE, target.constructor);
       const responses = Reflect.getMetadata(DECORATORS.API_RESPONSE, descriptor.value) || {};
+      if (Object.keys(responses).length) {
+        const metadataValue = responses; // 재고가 없습니다.
+
+        groupedMetadata['400'].content['application/json'].examples = {
+          ...content['application/json'].examples,
+          ...metadataValue['400'].content['application/json'].examples,
+        };
+      }
+
       Reflect.defineMetadata(
         DECORATORS.API_RESPONSE,
         {
@@ -74,39 +96,38 @@ export function ApiErrorResponseV2(statusCode: HttpStatusCode, ...dtos: ErrorRes
       );
       return descriptor;
     }
+    applyClassDecorator(target, dtos);
+    // const responses = Reflect.getMetadata(DECORATORS.API_RESPONSE, target) || {};
 
-    const responses = Reflect.getMetadata(DECORATORS.API_RESPONSE, target) || {};
-    console.log(Object.getOwnPropertyNames(target.prototype));
-    for (const key of Object.getOwnPropertyNames(target.prototype)) {
-      const methodDescriptor = Object.getOwnPropertyDescriptor(target.prototype, key);
-      const metadata = Reflect.getMetadata(DECORATORS.API_RESPONSE, methodDescriptor!.value);
+    // // console.log(Object.getOwnPropertyNames(target.prototype)); // [ 'constructor', 'findProduct' ]
+    // for (const key of Object.getOwnPropertyNames(target.prototype)) {
+    //   const methodDescriptor = Object.getOwnPropertyDescriptor(target.prototype, key);
+    //   const metadata = Reflect.getMetadata(DECORATORS.API_RESPONSE, methodDescriptor!.value);
+    //   if (metadata) {
+    //     const metadataValue = metadata as GrouppedMetadata;
 
-      console.log(key, methodDescriptor, JSON.stringify(metadata));
-    }
-    Reflect.defineMetadata(
-      DECORATORS.API_RESPONSE,
-      {
-        ...responses,
-        ...groupedMetadata,
-      },
-      target,
-    );
+    // groupedMetadata['400'].content['application/json'].examples = {
+    //   ...content['application/json'].examples,
+    //   ...metadataValue['400'].content['application/json'].examples,
+    // };
+    // console.log(metadataValue['400'].content);
+    // console.log(groupedMetadata['400'].content);
+
+    //     // responses = { ...responses, ...methodDescriptor!.value };
+    //   }
+    //   //    console.log(key, methodDescriptor, JSON.stringify(metadata));
+    // }
+
+    // Reflect.defineMetadata(
+    //   DECORATORS.API_RESPONSE,
+    //   {
+    //     ...responses,
+    //     ...groupedMetadata,
+    //   },
+    //   target,
+    // );
     return target;
   };
-  //   return applyDecorators(
-  //     ApiExtraModels(...extraModels),
-  //     ApiResponse({
-  //       status: statusCode,
-  //       content: {
-  //         'application/json': {
-  //           examples: example,
-  //           schema: {
-  //             oneOf: schemas,
-  //           },
-  //         },
-  //       },
-  //     }),
-  //   );
 }
 
 /**
@@ -167,3 +188,19 @@ function makeExample(dtos: ErrorResponse | ErrorResponse[]): ExamplesObject {
     };
   }
 }
+
+export type MetaContent = Record<string, ContentObject>;
+export const getApiResponseContent = (descriptor?: PropertyDescriptor): Record<string, MetaContent> => {
+  return Reflect.getMetadata(DECORATORS.API_RESPONSE, descriptor?.value);
+};
+
+export const applyClassDecorator = (target: any, exceptions: ErrorResponse[]) => {
+  for (const key of Object.getOwnPropertyNames(target.prototype)) {
+    const methodDescriptor = Object.getOwnPropertyDescriptor(target.prototype, key);
+    const metadata = Reflect.getMetadata(DECORATORS.API_RESPONSE, methodDescriptor!.value);
+    if (metadata) {
+      const decorator = ApiErrorResponseV2(400, ...exceptions);
+      decorator(target, key, methodDescriptor!);
+    }
+  }
+};
