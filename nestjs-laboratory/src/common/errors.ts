@@ -1,3 +1,5 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 export class BaseBusinessError extends Error {
   private readonly _code: string;
   private readonly _subCode?: string;
@@ -12,10 +14,12 @@ export class BaseBusinessError extends Error {
     this._subCode = subCode;
   }
 
+  @ApiProperty()
   get code() {
     return this._code;
   }
 
+  @ApiProperty()
   get message() {
     return this._message;
   }

@@ -2,6 +2,7 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 import { DECORATORS } from '@nestjs/swagger/dist/constants';
 import { ContentObject, ExamplesObject, ReferenceObject, SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
+import { ProductController } from '../product/product.controller';
 
 export type HttpStatusCode = 400 | 404;
 
@@ -11,16 +12,19 @@ export type ErrorResponse = {
   type: Function;
 };
 
+type SwaggerResponseContent = {
+  'application/json': {
+    examples: ExamplesObject;
+    schema: {
+      oneOf: (ReferenceObject | SchemaObject)[];
+    };
+  };
+};
+
+// set metadata
 type GrouppedMetadata = {
   [x: number]: {
-    content: {
-      'application/json': {
-        examples: ExamplesObject;
-        schema: {
-          oneOf: (ReferenceObject | SchemaObject)[];
-        };
-      };
-    };
+    content: SwaggerResponseContent;
     type: undefined;
     isArray: undefined;
     description: string;
@@ -32,8 +36,9 @@ export function ApiErrorResponse(statusCode: HttpStatusCode, ...dtos: ErrorRespo
 
   const schemas = makeSchemaPath(errorDto);
   const extraModels = makeExtraModels(errorDto);
+  //   console.log(schemas, extraModels);
   const example = makeExample(dtos);
-  console.log(schemas, ...extraModels);
+
   return applyDecorators(
     ApiExtraModels(...extraModels),
     ApiResponse({
@@ -54,8 +59,8 @@ export function ApiErrorResponseV2(statusCode: HttpStatusCode, ...dtos: ErrorRes
   const errorDto = dtos.map((e) => e.type);
 
   const schemas = makeSchemaPath(errorDto);
-
   const extraModels = makeExtraModels(errorDto);
+  //   console.log(schemas, extraModels);
   const example = makeExample(dtos);
   const content = {
     'application/json': {
@@ -65,7 +70,7 @@ export function ApiErrorResponseV2(statusCode: HttpStatusCode, ...dtos: ErrorRes
       },
     },
   };
-
+  //   console.log(extraModels);
   const groupedMetadata: GrouppedMetadata = {
     [statusCode]: {
       content,
@@ -79,21 +84,13 @@ export function ApiErrorResponseV2(statusCode: HttpStatusCode, ...dtos: ErrorRes
     if (descriptor) {
       const responses = Reflect.getMetadata(DECORATORS.API_RESPONSE, descriptor.value) || {};
       const models = Reflect.getMetadata(DECORATORS.API_EXTRA_MODELS, descriptor.value) || [];
-      if (Object.keys(responses).length) {
-        const metadataValue = responses; // 재고가 없습니다.
-
-        groupedMetadata['400'].content['application/json'].examples = {
-          ...content['application/json'].examples,
-          ...metadataValue['400'].content['application/json'].examples,
-        };
-        if (models.length) {
-          const schemaPath = makeSchemaPath(models);
-          // console.log([...content['application/json'].schema.oneOf, ...schemaPath]);
-          groupedMetadata['400'].content['application/json'].schema.oneOf = {
-            ...content['application/json'].schema.oneOf,
-            ...schemaPath,
-          };
-        }
+      if (models.length) {
+        const result = [...models, ...extraModels];
+        // console.log(result);
+      }
+      if (responses['400']) {
+        console.log(responses['400'].content['application/json']);
+        responses['400'];
       }
 
       Reflect.defineMetadata(
@@ -102,17 +99,15 @@ export function ApiErrorResponseV2(statusCode: HttpStatusCode, ...dtos: ErrorRes
           ...responses,
           ...groupedMetadata,
         },
-
         descriptor.value,
       );
-      console.log([...models, ...extraModels]);
-      const eerge = [...models, ...extraModels];
       Reflect.defineMetadata(
         DECORATORS.API_EXTRA_MODELS,
-        eerge,
+        [...models, ...extraModels],
 
         descriptor.value,
       );
+      //   console.log(Reflect.getMetadata(DECORATORS.API_EXTRA_MODELS, descriptor.value));
       return descriptor;
     }
     applyClassDecorator(target, dtos);
@@ -188,6 +183,7 @@ export const getApiResponseContent = (descriptor?: PropertyDescriptor): Record<s
 export const applyClassDecorator = (target: any, exceptions: ErrorResponse[]) => {
   for (const key of Object.getOwnPropertyNames(target.prototype)) {
     const methodDescriptor = Object.getOwnPropertyDescriptor(target.prototype, key);
+
     const metadata = Reflect.getMetadata(DECORATORS.API_RESPONSE, methodDescriptor!.value);
     if (metadata) {
       const decorator = ApiErrorResponseV2(400, ...exceptions);
