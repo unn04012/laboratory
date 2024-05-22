@@ -13,25 +13,12 @@ export class ProductController {
   constructor(private readonly _productService: ProductService) {}
 
   @Get('/:id')
-  @ApiErrorResponse(
-    400,
-    {
-      type: NotFoundInventory,
-      description: '재고가 없습니다',
-      errorCode: 'NOT_FOUND_INVENTORY',
-    },
-    // {
-    //   type: NotFoundProduct,
-    //   description: '상품이 없습니다',
-    //   errorCode: 'NOT_FOUND_PRODUCT',
-    // },
-  )
+  @ApiErrorResponse(400, {
+    type: NotFoundInventory,
+    description: '재고가 없습니다',
+    errorCode: 'NOT_FOUND_INVENTORY',
+  })
   public async findProduct(@Param('id') productId: string) {
     return await this._productService.findProduct(Number(productId));
   }
-
-  // @Post('/:id')
-  // public async updateProduct(@Param('id') productId: string) {
-  //   return await this._productService.findProduct(Number(productId));
-  // }
 }
