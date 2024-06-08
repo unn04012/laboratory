@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -10,6 +11,9 @@ import { MySQLConfig } from './config/config.mysql';
 import { dataSourceFactory, dataSourceOptionsFactory } from './infrastructure/typeorm-factory';
 import { ProductModule } from './product/product.module';
 import { EventModule } from './events/event.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisConnectionFactory } from './infrastructure/redis-connection-factory';
+import { RedisConfig } from './config/config-redis';
 
 @Module({
   imports: [
@@ -28,6 +32,11 @@ import { EventModule } from './events/event.module';
       inject: [MySQLConfig],
       useFactory: dataSourceOptionsFactory,
       dataSourceFactory: dataSourceFactory,
+    }),
+    CacheModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [RedisConfig],
+      useFactory: redisConnectionFactory,
     }),
     ProductModule,
     EventModule,
