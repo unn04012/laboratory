@@ -14,6 +14,7 @@ import { EventModule } from './events/event.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisConnectionFactory } from './infrastructure/redis-connection-factory';
 import { RedisConfig } from './config/config-redis';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -34,12 +35,14 @@ import { RedisConfig } from './config/config-redis';
       dataSourceFactory: dataSourceFactory,
     }),
     CacheModule.registerAsync({
+      isGlobal: true,
       imports: [ConfigModule],
       inject: [RedisConfig],
       useFactory: redisConnectionFactory,
     }),
     ProductModule,
     EventModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
