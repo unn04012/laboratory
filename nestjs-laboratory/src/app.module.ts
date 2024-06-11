@@ -11,10 +11,8 @@ import { MySQLConfig } from './config/config.mysql';
 import { dataSourceFactory, dataSourceOptionsFactory } from './infrastructure/typeorm-factory';
 import { ProductModule } from './product/product.module';
 import { EventModule } from './events/event.module';
-import { CacheModule } from '@nestjs/cache-manager';
-import { redisConnectionFactory } from './infrastructure/redis-connection-factory';
-import { RedisConfig } from './config/config-redis';
 import { UserModule } from './user/user.module';
+import { RedisModule } from './cache/redis.module';
 
 @Module({
   imports: [
@@ -34,12 +32,7 @@ import { UserModule } from './user/user.module';
       useFactory: dataSourceOptionsFactory,
       dataSourceFactory: dataSourceFactory,
     }),
-    CacheModule.registerAsync({
-      isGlobal: true,
-      imports: [ConfigModule],
-      inject: [RedisConfig],
-      useFactory: redisConnectionFactory,
-    }),
+    RedisModule,
     ProductModule,
     EventModule,
     UserModule,
