@@ -1,22 +1,22 @@
-import { Inject } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
-import { DateTime } from 'luxon';
 import { Symbols } from '../symbols';
-import Redis from 'ioredis';
+import { IUserVisitRepository } from './repository/user-visit-repository.interface';
 
+@Injectable()
 export class VisitorManageService {
-  private readonly _cacheKeyPrefix = 'DAILY_VISITORS';
-
-  constructor(@Inject(Symbols.redisClient) private readonly _client: Redis) {}
+  constructor(@Inject(Symbols.userVisitRepository) private readonly _userVisitRepository: IUserVisitRepository) {}
 
   /**
    * 방문자 정보를 기록합니다.
    */
   public async countVisitUser(companyId: number, userId: string, today: Date) {
-    const date = DateTime.fromJSDate(today).toFormat('yyyyMMdd');
+    await this._userVisitRepository.createVisitCompany({ userId, companyId, dateTime: today });
+  }
 
-    const key = `${this._cacheKeyPrefix}:${companyId}:${date}`;
+  public async getVisitCountByCompanyId(companyId: number, today: Date) {
+    const users = await this._userVisitRepository.getVisitCountByCompany(companyId, today);
 
-    await this._client.sadd(key, userId);
+    return users.length;
   }
 }
