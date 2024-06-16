@@ -10,4 +10,6 @@ export class UserManageService {
   public async setUser(userId: string) {
     await this._visitorManageService.countVisitUser(2, userId, new Date());
   }
+
+  public async search(keyword: string) {}
 }
