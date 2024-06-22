@@ -3,4 +3,5 @@ export const Symbols = {
   redisClient: Symbol.for('redisClient'),
   userVisitRepository: Symbol.for('userVisitRepository'),
   userSearchRepository: Symbol.for('userSearchRepository'),
+  tokenManager: Symbol.for('TokenManager'),
 };
