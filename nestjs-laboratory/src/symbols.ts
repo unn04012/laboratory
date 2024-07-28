@@ -4,4 +4,7 @@ export const Symbols = {
   userVisitRepository: Symbol.for('userVisitRepository'),
   userSearchRepository: Symbol.for('userSearchRepository'),
   tokenManager: Symbol.for('TokenManager'),
+  animalFactory: Symbol.for('AnimalFactory'),
 };
+
+export const Tokens = {};
