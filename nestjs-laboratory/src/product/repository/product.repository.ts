@@ -13,17 +13,22 @@ export type CreateProduct = {
 export class ProductRepository {
   constructor(@InjectRepository(ProductSchema) private readonly _repo: Repository<ProductSchema>) {}
 
-  public async createProduct(param: CreateProduct) {
-    await this._repo.save(param);
+  public async createProduct({ name, remainStock, receiveStock }: CreateProduct) {
+    const entity = this._repo.create({ name, remainStock, receiveStock });
+    return await this._repo.save(entity);
   }
 
-  public findOneBy() {
+  public findOneBy(lock?: boolean) {
     const repo = this._repo;
     return {
       async id(productId: number) {
-        const found = await repo.findOne({ where: { id: productId } });
+        const qb = repo.createQueryBuilder();
 
-        return found;
+        qb.where('id =:productId', { productId });
+
+        if (lock) qb.setLock('pessimistic_write');
+
+        return qb.getOne();
       },
     };
   }
@@ -32,5 +37,14 @@ export class ProductRepository {
     const entity = this._repo.create({ id, ...partial });
 
     await this._repo.save(entity);
+  }
+
+  public async decreateProductInventory(productId: number, orderCount: number) {
+    await this._repo
+      .createQueryBuilder()
+      .update()
+      .set({ remainStock: () => `remain_stock - :orderCount` })
+      .where('id = :productId', { orderCount, productId })
+      .execute();
   }
 }

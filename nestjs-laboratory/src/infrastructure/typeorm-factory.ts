@@ -5,13 +5,14 @@ import { MySQLConfig } from '../config/config.mysql';
 
 import { ProductSchema } from '../product/schemas/product.schema';
 import { OrderSchema } from '../product/schemas/order.schema';
+import { addTransactionalDataSource } from 'typeorm-transactional';
 
 export async function dataSourceFactory(options: DataSourceOptions): Promise<DataSource> {
   const initialized = await new DataSource(options).initialize();
   await inspectConnection(initialized);
 
-  //   return addTransactionalDataSource(initialized);
-  return initialized;
+  return addTransactionalDataSource(initialized);
+  // return initialized;
 }
 
 export function getAllTypeOrmModels() {

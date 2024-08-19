@@ -5,9 +5,9 @@ import { OrderSchema } from '../schemas/order.schema';
 
 export type CreateOrderParam = {
   userId: string;
-  orderId: string;
   productId: number;
   count: number;
+  orderId: string;
 };
 
 @Injectable()
