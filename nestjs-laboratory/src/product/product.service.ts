@@ -9,13 +9,16 @@ import { ProductRepository } from './repository/product.repository';
 import { DataSource, Transaction } from 'typeorm';
 import { ProductSchema } from './schemas/product.schema';
 import { OrderSchema } from './schemas/order.schema';
+import { RedisCommandHandler } from './redis-command.handler';
+import { sleep } from '../common/util';
 
 @Injectable()
 export class ProductService {
   constructor(
     @Inject(ProductRepository) private readonly _productRepository: ProductRepository,
-    @Inject(OrderRepository) private readonly _orderRepository: OrderRepository, // @Inject(Symbols.redisClient) private readonly _redisClient: Redis,
+    @Inject(OrderRepository) private readonly _orderRepository: OrderRepository,
     @Inject(DataSource) private readonly _dataSource: DataSource,
+    @Inject(RedisCommandHandler) private readonly _redisCommandHandler: RedisCommandHandler,
   ) {}
 
   public async findProduct(productId: number) {
@@ -39,6 +42,25 @@ export class ProductService {
 
     await this._orderRepository.createOrder({ userId, productId, count: orderCount, orderId: nanoid() });
     await this._productRepository.decreateProductInventory(productId, orderCount);
+  }
+
+  public async orderProductWithRedisLock(userId: string, productId: number, orderCount: number) {
+    let lock = await this._redisCommandHandler.setNx({ key: 'PRODUCT', identifier: productId });
+    while (lock) {
+      lock = await this._redisCommandHandler.setNx({ key: 'PRODUCT', identifier: productId });
+      console.log(`wait for get lock`);
+      await sleep(2000);
+    }
+
+    const product = await this._productRepository.findOneBy().id(productId);
+    if (!product) throw new NotFoundProduct(`not found product, productId: ${productId}`);
+
+    if (product.remainStock <= 0) throw new NotFoundInventory(`product inventory not found`);
+
+    await this._orderRepository.createOrder({ userId, productId, count: orderCount, orderId: nanoid() });
+    await this._productRepository.decreateProductInventory(productId, orderCount);
+
+    await this._redisCommandHandler.del(`lock:PRODUCT:${productId}`);
   }
 
   public async orderProductWithLock(userId: string, productId: number, orderCount: number) {
