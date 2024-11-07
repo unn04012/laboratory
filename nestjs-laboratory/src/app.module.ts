@@ -9,13 +9,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from './config/config.module';
 import { MySQLConfig } from './config/config.mysql';
 import { dataSourceFactory, dataSourceOptionsFactory } from './infrastructure/typeorm-factory';
-import { ProductModule } from './product/product.module';
 import { EventModule } from './events/event.module';
-import { UserModule } from './user/user.module';
-import { RedisModule } from './cache/redis.module';
+import { EmployeeModule } from './employee/employee.module';
 
 @Module({
   imports: [
+    EmployeeModule,
     ConfigModule,
     NotificationModule,
     EventEmitterModule.forRoot({
@@ -32,10 +31,10 @@ import { RedisModule } from './cache/redis.module';
       useFactory: dataSourceOptionsFactory,
       dataSourceFactory: dataSourceFactory,
     }),
-    RedisModule,
-    ProductModule,
+    // RedisModule,
+    // ProductModule,
     EventModule,
-    UserModule,
+    // UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

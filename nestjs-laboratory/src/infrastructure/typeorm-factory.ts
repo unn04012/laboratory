@@ -5,6 +5,7 @@ import { MySQLConfig } from '../config/config.mysql';
 
 import { ProductSchema } from '../product/schemas/product.schema';
 import { OrderSchema } from '../product/schemas/order.schema';
+import { SalariesSchema } from '../employee/schema/salaries.schema';
 import { addTransactionalDataSource } from 'typeorm-transactional';
 
 export async function dataSourceFactory(options: DataSourceOptions): Promise<DataSource> {
@@ -16,7 +17,7 @@ export async function dataSourceFactory(options: DataSourceOptions): Promise<Dat
 }
 
 export function getAllTypeOrmModels() {
-  return [ProductSchema, OrderSchema];
+  return [ProductSchema, OrderSchema, SalariesSchema];
 }
 
 export function dataSourceOptionsFactory(config: MySQLConfig): DataSourceOptions {
