@@ -5,7 +5,10 @@ import { join } from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
+  const httpApp = await NestFactory.create(AppModule);
+  await httpApp.listen(3000); // HTTP 서버 포트
+
+  const grpcApp = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {
       transport: Transport.GRPC,
@@ -20,6 +23,6 @@ async function bootstrap() {
     },
   );
 
-  await app.listen();
+  await grpcApp.listen();
 }
 bootstrap();
