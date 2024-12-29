@@ -21,11 +21,11 @@ export function sqsConfigurationFactory(queueConfig: AwsSQSConfig): SqsOptions {
 @Module({
   imports: [
     ConfigModule,
-    SqsModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [AwsSQSConfig],
-      useFactory: (queueConfig: AwsSQSConfig) => sqsConfigurationFactory(queueConfig),
-    }),
+    // SqsModule.registerAsync({
+    //   imports: [ConfigModule],
+    //   inject: [AwsSQSConfig],
+    //   useFactory: (queueConfig: AwsSQSConfig) => sqsConfigurationFactory(queueConfig),
+    // }),
   ],
   providers: [ConfigModule, ExternalEventGatewayService],
   exports: [ExternalEventGatewayService],

@@ -11,12 +11,15 @@ import { MySQLConfig } from './config/config.mysql';
 import { dataSourceFactory, dataSourceOptionsFactory } from './infrastructure/typeorm-factory';
 import { EventModule } from './events/event.module';
 import { EmployeeModule } from './employee/employee.module';
+import { ProducerConsumerModule } from './producer-consumer/producer-consumer.module';
+import { GrpcModule } from './grpc/grpc.module';
 
 @Module({
   imports: [
     EmployeeModule,
     ConfigModule,
     NotificationModule,
+    GrpcModule,
     EventEmitterModule.forRoot({
       wildcard: false,
       delimiter: '.',
@@ -34,7 +37,7 @@ import { EmployeeModule } from './employee/employee.module';
     // RedisModule,
     // ProductModule,
     EventModule,
-    // UserModule,
+    ProducerConsumerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

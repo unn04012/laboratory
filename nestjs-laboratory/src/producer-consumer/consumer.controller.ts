@@ -12,7 +12,12 @@ export class ConsumerController implements OnModuleInit {
 
   @EventPattern('peter-kafka01')
   async consumeMessage(@Payload() message: string) {
-    console.log('Received message:', message);
+    console.log('Received at v1 message:', message);
+  }
+
+  @EventPattern('peter-kafka01')
+  async consumeMessageV2(@Payload() message: string) {
+    console.log('Received at v2 message:', message);
   }
 
   @MessagePattern('peter-kafka01')
