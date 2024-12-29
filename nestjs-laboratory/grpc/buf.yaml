@@ -1,0 +1,15 @@
+version: 'v2'
+
+# 워크스페이스 설정
+modules:
+  - path: ./proto
+
+# Lint 규칙 설정
+lint:
+  use:
+    - DEFAULT
+
+# Breaking Change Detection 규칙 설정
+breaking:
+  use:
+    - FILE

@@ -1,0 +1,20 @@
+version: v2
+
+plugins:
+  - remote: buf.build/community/stephenh-ts-proto:v2.3.0
+    #local: ./node_modules/ts-proto/protoc-gen-ts_proto
+    out: ./grpc/ts
+    # strategy: all
+    opt:
+      - nestJs=true
+      - useOptionals=messages
+      - useDate=string
+      - env=node
+      - addNestjsRestParameter=true
+      - unrecognizedEnum=false
+      - unknownFields=false
+      - snakeToCamel=false
+      - addGrpcMetadata=true
+
+inputs:
+  - directory: ./grpc/proto

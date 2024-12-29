@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package example;
+
+// gRPC 서비스 정의
+service ExampleService {
+  rpc GetExample(Request) returns (Response);
+  rpc StreamExample(Request) returns (stream Response); // 스트리밍 예시
+}
+
+// 요청 메시지
+message Request {
+  string id = 1;
+}
+
+// 응답 메시지
+message Response {
+  string message = 1;
+}
