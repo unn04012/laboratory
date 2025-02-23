@@ -11,7 +11,7 @@ import { MySQLConfig } from './config/config.mysql';
 import { dataSourceFactory, dataSourceOptionsFactory } from './infrastructure/typeorm-factory';
 import { EventModule } from './events/event.module';
 import { EmployeeModule } from './employee/employee.module';
-import { ProducerConsumerModule } from './producer-consumer/producer-consumer.module';
+import { KafkaModule } from './producer-consumer/producer-consumer.module';
 import { GrpcModule } from './grpc/grpc.module';
 
 @Module({
@@ -37,7 +37,7 @@ import { GrpcModule } from './grpc/grpc.module';
     // RedisModule,
     // ProductModule,
     EventModule,
-    ProducerConsumerModule,
+    KafkaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

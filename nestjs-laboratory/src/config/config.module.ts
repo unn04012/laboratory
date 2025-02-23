@@ -5,6 +5,7 @@ import { RedisConfig } from './config-redis';
 import { TokenConfig } from './config-token';
 import { AwsSQSConfig } from './config.aws-sqs';
 import { MySQLConfig } from './config.mysql';
+import { KafkaConfig } from './config-kafka';
 
 @Module({
   providers: [
@@ -16,7 +17,8 @@ import { MySQLConfig } from './config.mysql';
     AwsSQSConfig,
     RedisConfig,
     TokenConfig,
+    KafkaConfig,
   ],
-  exports: [MySQLConfig, AwsSQSConfig, RedisConfig, TokenConfig],
+  exports: [MySQLConfig, AwsSQSConfig, RedisConfig, TokenConfig, KafkaConfig],
 })
 export class ConfigModule {}

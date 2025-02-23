@@ -5,35 +5,28 @@ import { join } from 'path/posix';
 import { initializeTransactionalContext } from 'typeorm-transactional';
 import { EXAMPLE_PACKAGE_NAME } from '../grpc/ts/example';
 import { AppModule } from './app.module';
+import { KafkaConfig } from './config/config-kafka';
 
 async function bootstrap() {
   initializeTransactionalContext();
   const app = await NestFactory.create(AppModule);
-  app.connectMicroservice({
-    transport: Transport.KAFKA,
-    options: {
-      client: {
-        brokers: ['localhost:9092'],
-      },
-      consumer: {
-        groupId: 'peter-group',
-      },
-    },
-  });
 
-  app.connectMicroservice<GrpcOptions>({
-    transport: Transport.GRPC,
-    options: {
-      url: `0.0.0.0:${7700}`,
-      package: [EXAMPLE_PACKAGE_NAME],
-      protoPath: [join(__dirname, '../grpc/proto', 'example.proto')],
-      loader: {
-        enums: String,
-        objects: true,
-        arrays: true,
-      },
-    },
-  });
+  const kafkaConfig = app.get(KafkaConfig);
+  app.connectMicroservice(kafkaConfig.defaultConsumerKafkaOption);
+
+  // app.connectMicroservice<GrpcOptions>({
+  //   transport: Transport.GRPC,
+  //   options: {
+  //     url: `0.0.0.0:${7700}`,
+  //     package: [EXAMPLE_PACKAGE_NAME],
+  //     protoPath: [join(__dirname, '../grpc/proto', 'example.proto')],
+  //     loader: {
+  //       enums: String,
+  //       objects: true,
+  //       arrays: true,
+  //     },
+  //   },
+  // });
 
   await app.startAllMicroservices();
 
