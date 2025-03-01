@@ -4,5 +4,5 @@ import { Symbols } from '../symbols';
 
 @Injectable()
 export class ConsumerService {
-  constructor(@Inject(Symbols.kafkaService) private readonly kafkaClient: ClientKafka) {}
+  constructor(@Inject(Symbols.kafkaConsumer) private readonly kafkaClient: ClientKafka) {}
 }

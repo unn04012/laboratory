@@ -5,7 +5,7 @@ import { Symbols } from '../symbols';
 
 @Injectable()
 export class ProducerService {
-  constructor(@Inject(Symbols.kafkaService) private readonly kafkaClient: ClientKafka) {}
+  constructor(@Inject(Symbols.kafkaIdempotentProducer) private readonly kafkaClient: ClientKafka) {}
 
   async produceMessage(message: string) {
     this.kafkaClient.emit('peter-kafka01', { value: message });
@@ -13,8 +13,18 @@ export class ProducerService {
   }
 
   async produceMessageSynchronous(message: string) {
-    const result = await lastValueFrom(this.kafkaClient.send('peter-kafka01', { value: message }));
+    const result = await lastValueFrom(this.kafkaClient.send('test-topic', { value: message }));
     console.log(result);
     return result;
+  }
+
+  async produceMessageTest(message: string) {
+    const result = await lastValueFrom(this.kafkaClient.emit('test-topic', { value: message }));
+    console.log(result);
+    return result;
+  }
+
+  async produceBatch(message: string) {
+    // const result = await
   }
 }

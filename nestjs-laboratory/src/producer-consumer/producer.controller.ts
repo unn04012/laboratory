@@ -16,4 +16,10 @@ export class ProducerController {
     const result = await this.producerService.produceMessageSynchronous(message);
     return { status: result };
   }
+
+  @Post('test')
+  async test(@Body('message') message: string) {
+    const result = await this.producerService.produceMessageTest(message);
+    return { status: result };
+  }
 }

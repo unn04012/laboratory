@@ -5,20 +5,34 @@ import { ConsumerController } from './consumer.controller';
 import { ConsumerService } from './consumer.service';
 import { ProducerController } from './producer.controller';
 import { ProducerService } from './producer.service';
+import { KafkaConfig } from '../config/config-kafka';
+import { ConfigModule } from '../config/config.module';
 
 @Module({
   imports: [
-    ClientsModule.register([
+    ClientsModule.registerAsync([
       {
-        name: Symbols.kafkaService,
-        transport: Transport.KAFKA,
-        options: {
-          client: {
-            brokers: ['localhost:9092'], // Kafka 브로커 주소
-          },
-          consumer: {
-            groupId: 'peter-group', // Consumer 그룹 ID
-          },
+        name: Symbols.kafkaProducer,
+        imports: [ConfigModule],
+        inject: [KafkaConfig],
+        useFactory: (config: KafkaConfig) => {
+          return config.defaultConsumerKafkaOption;
+        },
+      },
+      {
+        name: Symbols.kafkaIdempotentProducer,
+        imports: [ConfigModule],
+        inject: [KafkaConfig],
+        useFactory: (config: KafkaConfig) => {
+          return config.defaultKafkaIdempotentProducerOption;
+        },
+      },
+      {
+        name: Symbols.kafkaConsumer,
+        imports: [ConfigModule],
+        inject: [KafkaConfig],
+        useFactory: (config: KafkaConfig) => {
+          return config.defaultConsumerKafkaOption;
         },
       },
     ]),
@@ -26,4 +40,4 @@ import { ProducerService } from './producer.service';
   providers: [ProducerService, ConsumerService],
   controllers: [ProducerController, ConsumerController],
 })
-export class ProducerConsumerModule {}
+export class KafkaModule {}
