@@ -6,10 +6,9 @@ import { Symbols } from '../../symbols';
 
 @Injectable()
 export class KafkaTransactionService {
-  constructor(
-    @Inject(Symbols.kafkaIdempotentProducer) private readonly kafkaClient: ClientKafka,
-    private readonly _contentRepository: ContentRepository,
-  ) {}
+  constructor(@Inject(Symbols.kafkaConsumer) private readonly kafkaClient: ClientKafka, private readonly _contentRepository: ContentRepository) {
+    console.log(this.kafkaClient);
+  }
 
   public async atomicSend(content: string) {
     const producer = await this.kafkaClient.connect();

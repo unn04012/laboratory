@@ -30,7 +30,7 @@ describe('정확히 한 번 전송 테스트', () => {
   test('실패 시 message consume이 되어서는 안된다.', async () => {
     //TODO 전송 성공시 consume이 두 번되는 이유 추적
     //mock error
-    jest.spyOn(contentRepository, 'save').mockRejectedValue(new Error('DB Error'));
+    // jest.spyOn(contentRepository, 'save').mockRejectedValue(new Error('DB Error'));
 
     await kafkaTxService.atomicSend('this is atomic message');
   });

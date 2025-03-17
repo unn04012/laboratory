@@ -7,38 +7,12 @@ import { ClientsModule } from '@nestjs/microservices';
 import { Symbols } from '../symbols';
 import { ConfigModule } from '../config/config.module';
 import { KafkaConfig } from '../config/config-kafka';
+import { KafkaTransactionHTTPController } from './kafka-transaciton/kafka-transaction-http.controller';
+import { KafkaClientModule } from './kafka-client/kafka-client.module';
 
 @Module({
-  imports: [
-    ClientsModule.registerAsync([
-      {
-        name: Symbols.kafkaProducer,
-        imports: [ConfigModule],
-        inject: [KafkaConfig],
-        useFactory: (config: KafkaConfig) => {
-          return config.defaultConsumerKafkaOption;
-        },
-      },
-      {
-        name: Symbols.kafkaIdempotentProducer,
-        imports: [ConfigModule],
-        inject: [KafkaConfig],
-        useFactory: (config: KafkaConfig) => {
-          return config.defaultKafkaIdempotentProducerOption;
-        },
-      },
-      {
-        name: Symbols.kafkaConsumer,
-        imports: [ConfigModule],
-        inject: [KafkaConfig],
-        useFactory: (config: KafkaConfig) => {
-          return config.defaultConsumerKafkaOption;
-        },
-      },
-    ]),
-  ],
   // p],
-  controllers: [KafkaTransactionController],
+  controllers: [KafkaTransactionController, KafkaTransactionHTTPController],
   providers: [KafkaTransactionService, ContentRepository],
 })
 export class KafkaModule {}
