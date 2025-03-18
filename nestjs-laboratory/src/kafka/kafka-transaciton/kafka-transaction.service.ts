@@ -1,13 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
-import { Producer } from 'kafkajs';
 import { ContentRepository } from './content-repository';
 import { Symbols } from '../../symbols';
 
 @Injectable()
 export class KafkaTransactionService {
-  constructor(@Inject(Symbols.kafkaConsumer) private readonly kafkaClient: ClientKafka, private readonly _contentRepository: ContentRepository) {
-    console.log(this.kafkaClient);
+  constructor(@Inject(Symbols.kafkaClient) private readonly kafkaClient: ClientKafka, private readonly _contentRepository: ContentRepository) {}
+
+  public async emit(content: string) {
+    this.kafkaClient.emit('atomic-topic', content);
   }
 
   public async atomicSend(content: string) {

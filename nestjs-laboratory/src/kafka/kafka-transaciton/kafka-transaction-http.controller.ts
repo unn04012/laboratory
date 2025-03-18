@@ -8,4 +8,9 @@ export class KafkaTransactionHTTPController {
   public async atomicSend(@Body() dto: { content: string }) {
     await this._kafkaTransactionService.atomicSend(dto.content);
   }
+
+  @Post('emit-send')
+  public async emitSend(@Body() dto: { content: string }) {
+    await this._kafkaTransactionService.emit(dto.content);
+  }
 }
