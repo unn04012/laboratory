@@ -3,8 +3,6 @@ import { CommonResponse, GetMessageResponseDto, GetPgProviderDto } from './exter
 import { plainToClass } from 'class-transformer';
 
 export class ExternalApiRequester {
-  constructor() {}
-
   public async getPgProvider(url: string, params?: any): Promise<GetPgProviderDto> {
     const response = await this._getRequest<GetPgProviderDto>(url, GetPgProviderDto);
     return response;
