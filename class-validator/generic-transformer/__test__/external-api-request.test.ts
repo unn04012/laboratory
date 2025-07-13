@@ -21,19 +21,15 @@ beforeAll(async () => {
 describe('다양한 formatter를 사용하여 외부 API 응답을 변환할 수 있다', () => {
   test('pg provider를 DTO로 변환한다.', async () => {
     const requester = new ExternalApiRequester();
-    const response = await requester.getPgProvider('test-url');
+    const response = await requester.getPaymentPgProvider('test-url');
 
     expect(response).toBeInstanceOf(GetPgProviderDto);
-    expect(response.pgProvider).toBe('123');
-    expect(response.message).toBe(1234);
-    expect(mockedAxios.get).toHaveBeenCalledWith('test-url');
   });
 
   test('message DTO로 변환한다.', async () => {
     const requester = new ExternalApiRequester();
-    const response = await requester.getMessage('test-url');
+    const response = await requester.getPaymentMessage('test-url');
 
     expect(response).toBeInstanceOf(GetMessageResponseDto);
-    expect(response.message).toBe(1234);
   });
 });

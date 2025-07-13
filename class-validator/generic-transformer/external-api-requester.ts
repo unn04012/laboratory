@@ -3,13 +3,18 @@ import { CommonResponse, GetMessageResponseDto, GetPgProviderDto } from './exter
 import { plainToClass } from 'class-transformer';
 
 export class ExternalApiRequester {
-  public async getPgProvider(url: string, params?: any): Promise<GetPgProviderDto> {
-    const response = await this._getRequest<GetPgProviderDto>(url, GetPgProviderDto);
+  private readonly _baseUrl: string;
+
+  public async getPaymentPgProvider(params?: any): Promise<GetPgProviderDto> {
+    const requestUrl = `${this._baseUrl}/v1/payment/pg-provider`;
+
+    const response = await this._getRequest<GetPgProviderDto>(requestUrl, GetPgProviderDto);
     return response;
   }
 
-  public async getMessage(url: string, params?: any): Promise<GetMessageResponseDto> {
-    const response = await this._getRequest<GetMessageResponseDto>(url, GetMessageResponseDto);
+  public async getPaymentMessage(params?: any): Promise<GetMessageResponseDto> {
+    const requestUrl = `${this._baseUrl}/v1/payment/message`;
+    const response = await this._getRequest<GetMessageResponseDto>(requestUrl, GetMessageResponseDto);
     return response;
   }
 
