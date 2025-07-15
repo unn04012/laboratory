@@ -7,6 +7,7 @@ import {
   NotFoundUser,
 } from 'exceptions/not-found-exception';
 import { HttpBaseException } from 'exceptions/http-base-exception';
+import { ApiError } from './swagger/decorators/api-error.decorator';
 
 @Controller()
 @ApiExtraModels(
@@ -61,6 +62,46 @@ export class AppController {
     },
   })
   getHello(): string {
+    return this.appService.getHello();
+  }
+
+  @Get('/api')
+  @ApiError({ error: NotFoundProduct })
+  @ApiResponse(
+    {
+      status: 400,
+      description: 'Successful response',
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              message: { type: 'string' },
+            },
+          },
+        },
+      },
+    },
+    { overrideExisting: false },
+  )
+  @ApiResponse(
+    {
+      status: 400,
+      description: 'Successful response',
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              message: { type: 'string' },
+            },
+          },
+        },
+      },
+    },
+    { overrideExisting: false },
+  )
+  getSwaggerExample(): any {
     return this.appService.getHello();
   }
 }
