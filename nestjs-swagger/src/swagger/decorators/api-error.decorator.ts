@@ -1,3 +1,4 @@
+import { getSchemaPath } from '@nestjs/swagger';
 import { DECORATORS } from '@nestjs/swagger/dist/constants';
 import {
   ExamplesObject,
@@ -34,25 +35,52 @@ export function ApiError(
   ...options: ApiErrorOptions[]
 ): ClassDecorator & MethodDecorator {
   const groupedMetadata: GroupedMetadata = options.reduce((acc, option) => {
-    const statusCode = option.status || '400';
+    const statusCode = Number(option.status || '400');
 
-    acc[statusCode] = {
-      content: {
-        'application/json': {
-          examples: {}, // 적절한 examples 객체
-          schema: {
-            oneOf: [], // 적절한 schema 배열
+    // 기존 항목이 없으면 초기화
+    if (!acc[statusCode]) {
+      acc[statusCode] = {
+        content: {
+          'application/json': {
+            schema: {
+              oneOf: [],
+            },
+            examples: {},
           },
         },
-      },
-      type: undefined,
-      isArray: undefined,
-      description: option.description || '',
-    };
+        type: undefined,
+        isArray: undefined,
+        description: option.description || '',
+      };
+    }
+
+    // schema에 error 타입 추가 (중복 방지)
+    // const existingSchema =
+    //   acc[statusCode].content['application/json'].schema.oneOf;
+    // if (!existingSchema.includes(option.error)) {
+    //   existingSchema.push(option.error);
+    // }
+
+    // examples에 새로운 예시 추가
+    if (option.error.name) {
+      const instance = new option.error('Example error message');
+
+      acc[statusCode].content['application/json'].examples[option.error.name] =
+        {
+          summary: option.summary || '',
+          description: option.description || '',
+          value: {
+            statusCode: instance.statusCode,
+            code: instance.code,
+            message: instance.message,
+          },
+        };
+    }
 
     return acc;
-  }, {} as GroupedMetadata); // 초기값 제공
+  }, {} as GroupedMetadata);
 
+  console.log(JSON.stringify(groupedMetadata));
   return (
     target: any,
     key?: string | symbol,
@@ -70,12 +98,21 @@ export function ApiError(
       );
 
       //   console.log(descriptor.value);
-      console.log(apiResponses, extraModels);
+
       return descriptor;
     }
     return target;
   };
 }
-function omit(options: ApiErrorOptions[], arg1: string) {
-  throw new Error('Function not implemented.');
-}
+
+const applyClassDecorator = (target: any, exceptions: ApiErrorOptions[]) => {
+  for (const key of Object.getOwnPropertyNames(target.prototype)) {
+    const methodDescriptor = Object.getOwnPropertyDescriptor(
+      target.prototype,
+      key,
+    );
+
+    const decorator = ApiError(...exceptions);
+    decorator(target, key, methodDescriptor!);
+  }
+};
