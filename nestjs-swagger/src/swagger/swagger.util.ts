@@ -1,6 +1,6 @@
 import { getSchemaPath } from '@nestjs/swagger';
 import { ExamplesObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
-import { HttpBaseException } from 'exceptions/http-base-exception';
+import { HttpBaseException } from 'src/exceptions/http-base-exception';
 
 /**
  * extraModel과 getSchemaPath를 동시에 등록하는 파라미터를 제공합니다.

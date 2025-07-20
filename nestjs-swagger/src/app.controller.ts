@@ -5,17 +5,12 @@ import {
   NotFoundException,
   NotFoundProduct,
   NotFoundUser,
-} from 'exceptions/not-found-exception';
-import { HttpBaseException } from 'exceptions/http-base-exception';
+} from 'src/exceptions/not-found-exception';
+import { HttpBaseException } from 'src/exceptions/http-base-exception';
 import { ApiError } from './swagger/decorators/api-error.decorator';
 
 @Controller()
-@ApiExtraModels(
-  HttpBaseException,
-  NotFoundException,
-  NotFoundProduct,
-  NotFoundUser,
-)
+@ApiError({ error: NotFoundUser, status: 400 })
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
@@ -66,40 +61,16 @@ export class AppController {
   }
 
   @Get('/api')
-  @ApiError({ error: NotFoundProduct })
-  @ApiResponse(
+  @ApiError(
     {
+      error: NotFoundProduct,
+      description: '상품을 찾을 수 없을 때',
       status: 400,
-      description: 'Successful response',
-      content: {
-        'application/json': {
-          schema: {
-            type: 'object',
-            properties: {
-              message: { type: 'string' },
-            },
-          },
-        },
-      },
     },
-    { overrideExisting: false },
-  )
-  @ApiResponse(
     {
-      status: 400,
-      description: 'Successful response',
-      content: {
-        'application/json': {
-          schema: {
-            type: 'object',
-            properties: {
-              message: { type: 'string' },
-            },
-          },
-        },
-      },
+      error: NotFoundUser,
+      description: '사용자를 찾을 수 없을 때',
     },
-    { overrideExisting: false },
   )
   getSwaggerExample(): any {
     return this.appService.getHello();
