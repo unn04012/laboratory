@@ -10,7 +10,11 @@ import { HttpBaseException } from 'src/exceptions/http-base-exception';
 import { ApiError } from './swagger/decorators/api-error.decorator';
 
 @Controller()
-@ApiError({ error: NotFoundUser, status: 400 })
+@ApiError({
+  error: NotFoundProduct,
+  description: '상품을 찾을 수 없을 때',
+  status: 403,
+})
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
@@ -65,7 +69,6 @@ export class AppController {
     {
       error: NotFoundProduct,
       description: '상품을 찾을 수 없을 때',
-      status: 400,
     },
     {
       error: NotFoundUser,

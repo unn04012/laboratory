@@ -6,36 +6,39 @@ import {
   SchemaObject,
 } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 
-import { HttpBaseException } from 'exceptions/http-base-exception';
+import { HttpBaseException } from '../../exceptions/http-base-exception';
 
 export type ApiErrorOptions = {
   summary?: string;
   description?: string;
-  status?: string;
+  status?: number;
   error: new (...args: any[]) => HttpBaseException;
 };
 
-type GroupedMetadata = {
-  [x: number]: {
-    content: {
-      'application/json': {
-        examples: ExamplesObject;
-        schema: {
-          oneOf: (ReferenceObject | SchemaObject)[];
-        };
+type MetadataContent = {
+  content: {
+    'application/json': {
+      examples: ExamplesObject;
+      schema: {
+        oneOf: (ReferenceObject | SchemaObject)[];
       };
     };
-    type: undefined;
-    isArray: undefined;
-    description: string;
   };
+  type: undefined;
+  isArray: undefined;
+  description: string;
 };
 
-export function ApiError(
-  ...options: ApiErrorOptions[]
-): ClassDecorator & MethodDecorator {
-  const groupedMetadata: GroupedMetadata = options.reduce((acc, option) => {
-    const statusCode = Number(option.status || '400');
+type GroupedMetadata = {
+  [statusCode: number]: MetadataContent;
+};
+
+export function makeGroupedMetadata(
+  errors: ApiErrorOptions[],
+): GroupedMetadata {
+  const groupedMetadata: GroupedMetadata = errors.reduce((acc, option) => {
+    const instance = new option.error('Example error message');
+    const statusCode = Number(option.status || instance.statusCode);
 
     // 기존 항목이 없으면 초기화
     if (!acc[statusCode]) {
@@ -43,7 +46,7 @@ export function ApiError(
         content: {
           'application/json': {
             schema: {
-              oneOf: [],
+              oneOf: [{ $ref: getSchemaPath(HttpBaseException) }],
             },
             examples: {},
           },
@@ -54,17 +57,8 @@ export function ApiError(
       };
     }
 
-    // schema에 error 타입 추가 (중복 방지)
-    // const existingSchema =
-    //   acc[statusCode].content['application/json'].schema.oneOf;
-    // if (!existingSchema.includes(option.error)) {
-    //   existingSchema.push(option.error);
-    // }
-
     // examples에 새로운 예시 추가
     if (option.error.name) {
-      const instance = new option.error('Example error message');
-
       acc[statusCode].content['application/json'].examples[option.error.name] =
         {
           summary: option.summary || '',
@@ -80,27 +74,58 @@ export function ApiError(
     return acc;
   }, {} as GroupedMetadata);
 
-  console.log(JSON.stringify(groupedMetadata));
+  return groupedMetadata;
+}
+
+export function ApiError(
+  ...options: ApiErrorOptions[]
+): ClassDecorator & MethodDecorator {
+  const groupedMetadata = makeGroupedMetadata(options);
+
   return (
     target: any,
     key?: string | symbol,
     descriptor?: TypedPropertyDescriptor<any>,
   ) => {
+    // method decorator
     if (descriptor) {
-      const apiResponses = Reflect.getMetadata(
-        DECORATORS.API_RESPONSE,
-        descriptor.value,
-      );
+      const apiResponses = getApiResponseContent(descriptor);
 
-      const extraModels = Reflect.getMetadata(
-        DECORATORS.API_EXTRA_MODELS,
-        descriptor.value,
-      );
+      for (const [statusCode, newContent] of Object.entries(groupedMetadata)) {
+        const existingContent = apiResponses?.[statusCode];
+        if (existingContent) {
+          // 기존에 statusCode가 없는 경우, 기존 content를 그대로 사용
+          existingContent.content['application/json'].examples =
+            mergeExampleObject(
+              ...[
+                existingContent['application/json']?.examples,
+                newContent.content['application/json'].examples,
+              ],
+            );
+        } else {
+          setApiResponseContent(
+            {
+              ...groupedMetadata,
+              ...apiResponses,
+            },
+            descriptor,
+          );
+        }
+      }
+      const model = getApiModel(descriptor);
 
-      //   console.log(descriptor.value);
-
+      if (!model) {
+        Reflect.defineMetadata(
+          DECORATORS.API_EXTRA_MODELS,
+          [HttpBaseException],
+          descriptor.value,
+        );
+      }
       return descriptor;
+    } else {
+      applyClassDecorator(target, options);
     }
+
     return target;
   };
 }
@@ -116,3 +141,26 @@ const applyClassDecorator = (target: any, exceptions: ApiErrorOptions[]) => {
     decorator(target, key, methodDescriptor!);
   }
 };
+
+function getApiResponseContent(
+  descriptor: TypedPropertyDescriptor<any>,
+): GroupedMetadata {
+  return Reflect.getMetadata(DECORATORS.API_RESPONSE, descriptor.value);
+}
+
+function setApiResponseContent(
+  content: GroupedMetadata,
+  descriptor: TypedPropertyDescriptor<any>,
+) {
+  Reflect.defineMetadata(DECORATORS.API_RESPONSE, content, descriptor.value);
+}
+
+function getApiModel(descriptor: TypedPropertyDescriptor<any>) {
+  return Reflect.getMetadata(DECORATORS.API_EXTRA_MODELS, descriptor.value);
+}
+
+function mergeExampleObject(...examples: ExamplesObject[]): ExamplesObject {
+  return examples.reduce((merged, current) => {
+    return { ...merged, ...current };
+  }, {});
+}
