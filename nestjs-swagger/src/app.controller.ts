@@ -8,13 +8,9 @@ import {
 } from 'src/exceptions/not-found-exception';
 import { HttpBaseException } from 'src/exceptions/http-base-exception';
 import { ApiError } from './swagger/decorators/api-error.decorator';
+import { NotAdultError } from './exceptions/business-exception';
 
 @Controller()
-@ApiError({
-  error: NotFoundProduct,
-  description: '상품을 찾을 수 없을 때',
-  status: 403,
-})
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
@@ -73,6 +69,10 @@ export class AppController {
     {
       error: NotFoundUser,
       description: '사용자를 찾을 수 없을 때',
+    },
+    {
+      error: NotAdultError,
+      description: '성인이 아닐 때',
     },
   )
   getSwaggerExample(): any {
