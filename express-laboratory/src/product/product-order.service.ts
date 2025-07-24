@@ -8,6 +8,11 @@ import { NotFoundProductOrder, ProductNotRemainStock } from './proudct-order.err
 export class ProductOrderService {
   constructor(private readonly _productRepository: ProductRepository, private readonly _orderRepository: OrderRepository) {}
 
+  public async getProducts() {
+    await this._productRepository.sleep(10);
+    return await this._productRepository.findOneBy().id(1);
+  }
+
   public async order(productId: number, userId: string) {
     return await getDataSource().transaction('SERIALIZABLE', async (mgr) => {
       const product = await this._productRepository.findOneBy(mgr).id(productId);

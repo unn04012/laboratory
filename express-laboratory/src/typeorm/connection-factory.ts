@@ -9,6 +9,7 @@ let connection: DataSource | null = null;
 
 export async function dataSourceFactory(config: MysqlConfig) {
   const { connectionLimit, database, host, password, user } = config;
+  console.log(`connection limit: ${connectionLimit}, database: ${database}, host: ${host}, user: ${user}`);
   const dataSource = new DataSource({
     type: 'mysql',
     host,
@@ -19,7 +20,12 @@ export async function dataSourceFactory(config: MysqlConfig) {
     synchronize: false,
     logging: true,
     entities: [ProductSchema, OrderSchema],
-    poolSize: connectionLimit,
+    poolSize: 30,
+    // extra: {
+    //   connectionLimit: 30,
+    //   maxIdle: 30,
+    // },
+
     namingStrategy: new SnakeNamingStrategy(),
   });
 

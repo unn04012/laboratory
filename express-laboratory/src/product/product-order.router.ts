@@ -12,6 +12,17 @@ export function initProductOrderRouter() {
 
   const service = new ProductOrderService(productRepo, orderRepo);
 
+  router.get(
+    '/',
+    wrapAsync(async (req, res, next) => {
+      const { productId } = req.body;
+      const userId = v4();
+
+      const result = await service.getProducts();
+      res.json(result);
+    })
+  );
+
   router.post(
     '/',
     wrapAsync(async (req, res, next) => {

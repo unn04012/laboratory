@@ -16,7 +16,7 @@ export function startServer() {
 
   registerRoutes(app, [ProductOrderController]);
 
-  // app.use('/product', initProductOrderRouter());
+  app.use('/product', initProductOrderRouter());
 
   app.get('/', (req: Request, res: Response) => {
     res.send('Typescript + Node.js + Express Server');

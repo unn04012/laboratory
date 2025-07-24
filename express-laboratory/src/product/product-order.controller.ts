@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { v4 } from 'uuid';
 import { Controller } from '../common/decorators/controller-decorator';
-import { Post } from '../common/decorators/http-method-decorator';
+import { Get, Post } from '../common/decorators/http-method-decorator';
 import { getRepository } from '../init-repository';
 import { ProductOrderService } from './product-order.service';
 
@@ -14,6 +14,11 @@ export class ProductOrderController {
     const orderRepo = getRepository().order();
 
     this._service = new ProductOrderService(productRepo, orderRepo);
+  }
+
+  @Get('/')
+  public async getProducts(req: Request, res: Response) {
+    return await this._service.getProducts();
   }
 
   @Post()
