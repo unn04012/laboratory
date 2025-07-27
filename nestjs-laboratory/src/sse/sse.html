@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSE 테스트 페이지</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+
+      .container {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      h1 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .controls {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s ease;
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .connect-btn {
+        background-color: #4caf50;
+        color: white;
+      }
+
+      .connect-btn:hover:not(:disabled) {
+        background-color: #45a049;
+      }
+
+      .disconnect-btn {
+        background-color: #f44336;
+        color: white;
+      }
+
+      .disconnect-btn:hover:not(:disabled) {
+        background-color: #da190b;
+      }
+
+      .clear-btn {
+        background-color: #ff9800;
+        color: white;
+      }
+
+      .clear-btn:hover {
+        background-color: #e68900;
+      }
+
+      .status {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+
+      .status-item {
+        background: #e3f2fd;
+        padding: 10px 15px;
+        border-radius: 5px;
+        border-left: 4px solid #2196f3;
+      }
+
+      .status-item.connected {
+        background: #e8f5e8;
+        border-left-color: #4caf50;
+      }
+
+      .status-item.disconnected {
+        background: #ffebee;
+        border-left-color: #f44336;
+      }
+
+      .logs {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 15px;
+        height: 400px;
+        overflow-y: auto;
+        background: #fafafa;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      .log-entry {
+        margin-bottom: 8px;
+        padding: 5px;
+        border-radius: 3px;
+      }
+
+      .log-info {
+        background: #e3f2fd;
+        border-left: 3px solid #2196f3;
+      }
+
+      .log-success {
+        background: #e8f5e8;
+        border-left: 3px solid #4caf50;
+      }
+
+      .log-error {
+        background: #ffebee;
+        border-left: 3px solid #f44336;
+      }
+
+      .log-data {
+        background: #fff3e0;
+        border-left: 3px solid #ff9800;
+      }
+
+      .timestamp {
+        color: #666;
+        font-size: 11px;
+      }
+
+      .server-url {
+        width: 300px;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-right: 10px;
+      }
+
+      .endpoint-selector {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-right: 10px;
+      }
+
+      .chunk-input,
+      .interval-input {
+        width: 120px;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-right: 10px;
+        text-align: center;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .stat-number {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .stat-label {
+        font-size: 12px;
+        opacity: 0.9;
+      }
+
+      /* 대화 UI 스타일 */
+      .chat-container {
+        display: none;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        height: 300px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chat-messages {
+        flex: 1;
+        padding: 15px;
+        overflow-y: auto;
+        background: #f9f9f9;
+        border-radius: 8px 8px 0 0;
+      }
+
+      .message {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 8px;
+        max-width: 80%;
+        word-wrap: break-word;
+      }
+
+      .message.user {
+        background: #007bff;
+        color: white;
+        margin-left: auto;
+        text-align: right;
+      }
+
+      .message.assistant {
+        background: white;
+        border: 1px solid #ddd;
+        margin-right: auto;
+      }
+
+      .message.system {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        color: #6c757d;
+        text-align: center;
+        font-style: italic;
+        max-width: 100%;
+      }
+
+      .message-time {
+        font-size: 10px;
+        opacity: 0.7;
+        margin-top: 5px;
+      }
+
+      .chat-input-area {
+        padding: 15px;
+        border-top: 1px solid #ddd;
+        background: white;
+        border-radius: 0 0 8px 8px;
+      }
+
+      .chat-input-container {
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+      }
+
+      .chat-input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        resize: vertical;
+        min-height: 40px;
+        max-height: 120px;
+        font-family: inherit;
+      }
+
+      .send-btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
+      .send-btn:hover:not(:disabled) {
+        background: #0056b3;
+      }
+
+      .send-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🚀 SSE (Server-Sent Events) 테스트 페이지</h1>
+
+    <div class="container">
+      <div class="controls">
+        <input type="text" id="serverUrl" class="server-url" value="http://localhost:3000" placeholder="서버 URL" />
+        <select id="endpoint" class="endpoint-selector">
+          <option value="/sse/interactive">대화형 SSE (사용자 입력)</option>
+          <option value="/sse/events">기본 데이터 스트림</option>
+          <option value="/sse/heartbeat">하트비트</option>
+          <option value="/sse/multi-events">다중 이벤트</option>
+        </select>
+        <input type="number" id="chunkSize" class="chunk-input" value="300" min="10" max="10000" placeholder="청크 크기" />
+        <input type="number" id="interval" class="interval-input" value="2000" min="100" max="60000" placeholder="간격(ms)" />
+        <button id="connectBtn" class="connect-btn">연결</button>
+        <button id="disconnectBtn" class="disconnect-btn" disabled>연결 해제</button>
+        <button id="clearBtn" class="clear-btn">로그 지우기</button>
+      </div>
+
+      <div class="status">
+        <div id="connectionStatus" class="status-item disconnected"><strong>연결 상태:</strong> <span id="statusText">연결 안됨</span></div>
+        <div class="status-item"><strong>현재 시간:</strong> <span id="currentTime"></span></div>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-number" id="messageCount">0</div>
+          <div class="stat-label">수신된 메시지</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="connectionTime">0</div>
+          <div class="stat-label">연결 시간 (초)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="avgLatency">0</div>
+          <div class="stat-label">평균 지연시간 (ms)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="dataReceived">0</div>
+          <div class="stat-label">수신 데이터 (KB)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 대화형 채팅 UI -->
+    <div class="container" id="chatContainer" style="display: none">
+      <h3>💬 실시간 대화</h3>
+      <div class="chat-container" id="chatWindow">
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-area">
+          <div class="chat-input-container">
+            <textarea id="chatInput" class="chat-input" placeholder="메시지를 입력하세요... (Shift+Enter로 줄바꿈, Enter로 전송)" rows="1"></textarea>
+            <button id="sendChatBtn" class="send-btn" disabled>전송</button>
+          </div>
+          <div style="font-size: 12px; color: #666; margin-top: 8px">💡 팁: "안녕", "테스트", "긴 응답" 등의 키워드를 포함해보세요</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 기존 메시지 전송 UI (호환성을 위해 유지) -->
+    <div class="container" id="messageContainer" style="display: none">
+      <h3>💬 메시지 전송 (레거시)</h3>
+      <div style="display: flex; gap: 10px; margin-bottom: 15px">
+        <input
+          type="text"
+          id="messageInput"
+          placeholder="메시지를 입력하세요..."
+          style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px"
+        />
+        <button id="sendBtn" class="connect-btn" disabled>전송</button>
+      </div>
+    </div>
+
+    <div class="container">
+      <h3>📋 실시간 로그</h3>
+      <div id="logs" class="logs"></div>
+    </div>
+
+    <script>
+      let eventSource = null;
+      let messageCount = 0;
+      let totalLatency = 0;
+      let totalDataReceived = 0;
+      let connectionStartTime = null;
+      let connectionTimer = null;
+      let clientId = null;
+
+      // DOM 요소들
+      const connectBtn = document.getElementById('connectBtn');
+      const disconnectBtn = document.getElementById('disconnectBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const sendBtn = document.getElementById('sendBtn');
+      const sendChatBtn = document.getElementById('sendChatBtn');
+      const messageInput = document.getElementById('messageInput');
+      const chatInput = document.getElementById('chatInput');
+      const messageContainer = document.getElementById('messageContainer');
+      const chatContainer = document.getElementById('chatContainer');
+      const chatMessages = document.getElementById('chatMessages');
+      const chatWindow = document.getElementById('chatWindow');
+      const serverUrl = document.getElementById('serverUrl');
+      const endpoint = document.getElementById('endpoint');
+      const chunkSize = document.getElementById('chunkSize');
+      const interval = document.getElementById('interval');
+      const connectionStatus = document.getElementById('connectionStatus');
+      const statusText = document.getElementById('statusText');
+      const logs = document.getElementById('logs');
+      const currentTime = document.getElementById('currentTime');
+
+      // 통계 요소들
+      const messageCountEl = document.getElementById('messageCount');
+      const connectionTimeEl = document.getElementById('connectionTime');
+      const avgLatencyEl = document.getElementById('avgLatency');
+      const dataReceivedEl = document.getElementById('dataReceived');
+
+      // 현재 시간 업데이트
+      function updateCurrentTime() {
+        currentTime.textContent = new Date().toLocaleString('ko-KR');
+      }
+      setInterval(updateCurrentTime, 1000);
+      updateCurrentTime();
+
+      // 로그 추가 함수
+      function addLog(message, type = 'info') {
+        const logEntry = document.createElement('div');
+        logEntry.className = `log-entry log-${type}`;
+
+        const timestamp = new Date().toLocaleTimeString('ko-KR');
+        logEntry.innerHTML = `
+              <span class="timestamp">[${timestamp}]</span> ${message}
+          `;
+
+        logs.appendChild(logEntry);
+        logs.scrollTop = logs.scrollHeight;
+      }
+
+      // 채팅 메시지 추가 함수
+      function addChatMessage(content, type = 'system', isStreaming = false) {
+        let messageDiv;
+
+        if (isStreaming && type === 'assistant') {
+          // 스트리밍 중인 어시스턴트 메시지 업데이트
+          const existingMessages = chatMessages.querySelectorAll('.message.assistant');
+          const lastMessage = existingMessages[existingMessages.length - 1];
+
+          if (lastMessage && lastMessage.classList.contains('streaming')) {
+            const contentDiv = lastMessage.querySelector('.message-content');
+            if (contentDiv) {
+              contentDiv.textContent += content;
+              chatMessages.scrollTop = chatMessages.scrollHeight;
+              return lastMessage;
+            }
+          }
+        }
+
+        messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}`;
+
+        if (isStreaming) {
+          messageDiv.classList.add('streaming');
+        }
+
+        const timestamp = new Date().toLocaleTimeString('ko-KR');
+        messageDiv.innerHTML = `
+          <div class="message-content">${content}</div>
+          <div class="message-time">${timestamp}</div>
+        `;
+
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        return messageDiv;
+      }
+
+      // 스트리밍 완료 처리
+      function finishStreaming() {
+        const streamingMessages = chatMessages.querySelectorAll('.message.streaming');
+        streamingMessages.forEach((msg) => {
+          msg.classList.remove('streaming');
+        });
+      }
+
+      // 통계 업데이트
+      function updateStats() {
+        messageCountEl.textContent = messageCount;
+
+        if (connectionStartTime) {
+          const connectionTime = Math.floor((Date.now() - connectionStartTime) / 1000);
+          connectionTimeEl.textContent = connectionTime;
+        }
+
+        if (messageCount > 0) {
+          avgLatencyEl.textContent = Math.round(totalLatency / messageCount);
+        }
+
+        dataReceivedEl.textContent = (totalDataReceived / 1024).toFixed(1);
+      }
+
+      // 엔드포인트별 기본값 설정
+      endpoint.addEventListener('change', function () {
+        const selectedEndpoint = endpoint.value;
+        const isInteractive = selectedEndpoint === '/sse/interactive';
+
+        // 대화형 모드일 때 채팅 UI 표시
+        chatContainer.style.display = isInteractive ? 'block' : 'none';
+        messageContainer.style.display = 'none'; // 레거시 UI는 숨김
+
+        if (selectedEndpoint === '/sse/heartbeat') {
+          chunkSize.value = '50';
+          chunkSize.disabled = true;
+          interval.value = '5000';
+          interval.disabled = false;
+        } else if (selectedEndpoint === '/sse/interactive') {
+          chunkSize.value = '300';
+          chunkSize.disabled = false;
+          interval.disabled = true;
+          interval.value = '1000';
+        } else {
+          chunkSize.disabled = false;
+          interval.disabled = false;
+          if (selectedEndpoint === '/sse/events') {
+            chunkSize.value = '300';
+            interval.value = '2000';
+          } else if (selectedEndpoint === '/sse/multi-events') {
+            chunkSize.value = '300';
+            interval.value = '1500';
+          }
+        }
+      });
+
+      // 연결 함수
+      function connect() {
+        if (eventSource) {
+          disconnect();
+        }
+
+        const url = serverUrl.value + endpoint.value;
+        const params = new URLSearchParams();
+
+        if (endpoint.value !== '/sse/interactive') {
+          params.append('chunkSize', chunkSize.value);
+          params.append('interval', interval.value);
+        }
+
+        const fullUrl = params.toString() ? `${url}?${params}` : url;
+        addLog(`🔄 연결 시도: ${fullUrl}`, 'info');
+
+        try {
+          eventSource = new EventSource(fullUrl);
+          connectionStartTime = Date.now();
+
+          // 연결 타이머 시작
+          connectionTimer = setInterval(updateStats, 1000);
+
+          eventSource.onopen = function (event) {
+            addLog('✅ SSE 연결 성공!', 'success');
+            connectionStatus.className = 'status-item connected';
+            statusText.textContent = '연결됨';
+            connectBtn.disabled = true;
+            disconnectBtn.disabled = false;
+
+            // 대화형 모드에서 채팅 메시지 추가
+            if (endpoint.value === '/sse/interactive') {
+              addChatMessage('연결되었습니다. 메시지를 입력해주세요.', 'system');
+            }
+          };
+
+          eventSource.onmessage = function (event) {
+            handleMessage(event, 'message');
+          };
+
+          // 커스텀 이벤트 핸들러들
+          eventSource.addEventListener('connected', function (event) {
+            handleMessage(event, 'connected');
+            try {
+              const data = JSON.parse(event.data);
+              if (data.clientId) {
+                clientId = data.clientId;
+                addLog(`🆔 클라이언트 ID: ${clientId}`, 'info');
+              }
+            } catch (e) {
+              console.warn('Failed to parse connected event data:', e);
+            }
+          });
+
+          eventSource.addEventListener('heartbeat', function (event) {
+            handleMessage(event, 'heartbeat');
+          });
+
+          eventSource.addEventListener('notification', function (event) {
+            handleMessage(event, 'notification');
+          });
+
+          eventSource.addEventListener('waiting-input', function (event) {
+            handleMessage(event, 'waiting-input');
+            sendBtn.disabled = false;
+            sendChatBtn.disabled = false;
+          });
+
+          eventSource.addEventListener('user-input-received', function (event) {
+            handleMessage(event, 'user-input-received');
+            sendBtn.disabled = true;
+            sendChatBtn.disabled = true;
+          });
+
+          eventSource.addEventListener('response', function (event) {
+            handleMessage(event, 'response');
+
+            // 채팅 UI에 스트리밍 응답 표시
+            if (endpoint.value === '/sse/interactive') {
+              try {
+                const data = JSON.parse(event.data);
+                if (data.content || data.message) {
+                  addChatMessage(data.content || data.message, 'assistant', true);
+                }
+              } catch (e) {
+                console.warn('Failed to parse response data:', e);
+              }
+            }
+          });
+
+          eventSource.addEventListener('response-complete', function (event) {
+            handleMessage(event, 'response-complete');
+            sendBtn.disabled = false;
+            sendChatBtn.disabled = false;
+            finishStreaming();
+          });
+
+          eventSource.onerror = function (event) {
+            addLog('❌ SSE 연결 오류 발생', 'error');
+            console.error('SSE Error:', event);
+
+            if (eventSource.readyState === EventSource.CLOSED) {
+              addLog('🔌 연결이 서버에 의해 종료됨', 'error');
+              disconnect();
+            }
+          };
+        } catch (error) {
+          addLog(`❌ 연결 실패: ${error.message}`, 'error');
+          console.error('Connection error:', error);
+        }
+      }
+
+      // 메시지 처리 함수
+      function handleMessage(event, eventType) {
+        messageCount++;
+
+        try {
+          const data = JSON.parse(event.data);
+          const messageSize = new Blob([event.data]).size;
+          totalDataReceived += messageSize;
+
+          // 지연시간 계산
+          if (data.timestamp) {
+            const latency = Date.now() - new Date(data.timestamp).getTime();
+            totalLatency += latency;
+
+            addLog(`📨 [${eventType}] ID: ${event.lastEventId || 'N/A'}, 지연시간: ${latency}ms, 크기: ${messageSize}bytes`, 'data');
+          } else {
+            addLog(`📨 [${eventType}] ID: ${event.lastEventId || 'N/A'}, 크기: ${messageSize}bytes`, 'data');
+          }
+
+          // 데이터 내용 로깅 (처음 100자만)
+          const content = data.message || data.content || JSON.stringify(data);
+          if (content.length > 100) {
+            addLog(`📝 데이터: "${content.substring(0, 100)}..."`, 'info');
+          } else {
+            addLog(`📝 데이터: ${content}`, 'info');
+          }
+        } catch (error) {
+          addLog(`⚠️ JSON 파싱 오류: ${error.message}`, 'error');
+          addLog(`📨 원본 데이터: ${event.data}`, 'data');
+        }
+
+        updateStats();
+      }
+
+      // 메시지 전송 함수 (채팅용)
+      async function sendChatMessage() {
+        const message = chatInput.value.trim();
+        if (!message) {
+          addLog('⚠️ 메시지를 입력하세요', 'error');
+          return;
+        }
+
+        if (!clientId) {
+          addLog('⚠️ 연결을 확인하세요', 'error');
+          return;
+        }
+
+        const chunkSizeValue = parseInt(chunkSize.value) || 300;
+
+        try {
+          sendChatBtn.disabled = true;
+
+          // 사용자 메시지를 채팅에 표시
+          addChatMessage(message, 'user');
+          addLog(`📤 메시지 전송: "${message}"`, 'info');
+
+          const response = await fetch(`${serverUrl.value}/sse/send-message`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              clientId: clientId,
+              message: message,
+              chunkSize: chunkSizeValue,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            addLog('✅ 메시지 전송 성공', 'success');
+            chatInput.value = '';
+            autoResizeTextarea(chatInput);
+          } else {
+            addLog(`❌ 메시지 전송 실패: ${result.message}`, 'error');
+            sendChatBtn.disabled = false;
+          }
+        } catch (error) {
+          addLog(`❌ 네트워크 오류: ${error.message}`, 'error');
+          sendChatBtn.disabled = false;
+        }
+      }
+
+      // 레거시 메시지 전송 함수
+      async function sendMessage() {
+        const message = messageInput.value.trim();
+        if (!message || !clientId) {
+          addLog('⚠️ 메시지를 입력하거나 연결을 확인하세요', 'error');
+          return;
+        }
+
+        const chunkSizeValue = parseInt(chunkSize.value) || 300;
+
+        try {
+          sendBtn.disabled = true;
+          addLog(`📤 메시지 전송: "${message}"`, 'info');
+
+          const response = await fetch(`${serverUrl.value}/sse/send-message`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              clientId: clientId,
+              message: message,
+              chunkSize: chunkSizeValue,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            addLog('✅ 메시지 전송 성공', 'success');
+            messageInput.value = '';
+          } else {
+            addLog(`❌ 메시지 전송 실패: ${result.message}`, 'error');
+            sendBtn.disabled = false;
+          }
+        } catch (error) {
+          addLog(`❌ 네트워크 오류: ${error.message}`, 'error');
+          sendBtn.disabled = false;
+        }
+      }
+
+      // 연결 해제 함수
+      function disconnect() {
+        if (eventSource) {
+          eventSource.close();
+          eventSource = null;
+          addLog('🔌 SSE 연결 해제됨', 'info');
+        }
+
+        if (connectionTimer) {
+          clearInterval(connectionTimer);
+          connectionTimer = null;
+        }
+
+        connectionStatus.className = 'status-item disconnected';
+        statusText.textContent = '연결 안됨';
+        connectBtn.disabled = false;
+        disconnectBtn.disabled = true;
+        sendBtn.disabled = true;
+        sendChatBtn.disabled = true;
+        connectionStartTime = null;
+        clientId = null;
+      }
+
+      // 로그 지우기 함수
+      function clearLogs() {
+        logs.innerHTML = '';
+        chatMessages.innerHTML = '';
+        messageCount = 0;
+        totalLatency = 0;
+        totalDataReceived = 0;
+        updateStats();
+        addLog('🧹 로그가 지워졌습니다', 'info');
+      }
+
+      // 텍스트에리어 자동 크기 조절
+      function autoResizeTextarea(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+      }
+
+      // 이벤트 리스너 등록
+      connectBtn.addEventListener('click', connect);
+      disconnectBtn.addEventListener('click', disconnect);
+      clearBtn.addEventListener('click', clearLogs);
+      sendBtn.addEventListener('click', sendMessage);
+      sendChatBtn.addEventListener('click', sendChatMessage);
+
+      // 채팅 입력 처리
+      chatInput.addEventListener('input', function () {
+        autoResizeTextarea(this);
+      });
+
+      chatInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          if (!sendChatBtn.disabled) {
+            sendChatMessage();
+          }
+        }
+      });
+
+      // 레거시 입력 처리
+      messageInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter' && !sendBtn.disabled) {
+          sendMessage();
+        }
+      });
+
+      // 페이지 언로드 시 연결 해제
+      window.addEventListener('beforeunload', disconnect);
+
+      // 초기 설정
+      endpoint.dispatchEvent(new Event('change'));
+
+      // 초기 로그
+      addLog('👋 SSE 테스트 페이지에 오신 것을 환영합니다!', 'info');
+      addLog('💡 대화형 SSE를 선택하여 실시간 채팅을 테스트해보세요', 'info');
+      addLog('📝 청크 크기: 10~10,000자, 간격: 100ms~60초 범위에서 설정 가능', 'info');
+    </script>
+  </body>
+</html>
