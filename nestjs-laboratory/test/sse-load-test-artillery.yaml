@@ -1,0 +1,12 @@
+config:
+  target: http://localhost:8080/sse
+  processor: ./helpers.js
+  phases:
+    - duration: 10
+      arrivalRate: 1
+  engines:
+    sse: {}
+scenarios:
+  - engine: sse
+  - flow:
+      - log: 'Current environment is set to: {{ $environment }}'
