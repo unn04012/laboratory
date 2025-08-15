@@ -4,6 +4,10 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { MysqlConfig } from '../config/config.mysql';
 import { OrderSchema } from '../schemas/order-schema';
 import { ProductSchema } from '../schemas/product-schema';
+import { AppEnvironmentEntity } from '../single-table-inheritance/schema/app-environment.schema';
+import { WebEnvironmentEntity } from '../single-table-inheritance/schema/web-environment.schema';
+import { RefEnvironmentEntity } from '../single-table-inheritance/schema/environment.schema';
+import { InquiryEntity } from '../single-table-inheritance/schema/inquiry.schema';
 
 let connection: DataSource | null = null;
 
@@ -19,7 +23,7 @@ export async function dataSourceFactory(config: MysqlConfig) {
     database,
     synchronize: false,
     logging: true,
-    entities: [ProductSchema, OrderSchema],
+    entities: [AppEnvironmentEntity, WebEnvironmentEntity, RefEnvironmentEntity, InquiryEntity],
     poolSize: 30,
     // extra: {
     //   connectionLimit: 30,
