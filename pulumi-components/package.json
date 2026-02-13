@@ -1,0 +1,21 @@
+{
+  "name": "@lab/pulumi-components",
+  "version": "1.0.0",
+  "description": "Reusable Pulumi components for laboratory projects",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "keywords": ["pulumi", "infrastructure", "components"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@pulumi/pulumi": "^3.100.0",
+    "@pulumi/aws": "^6.15.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

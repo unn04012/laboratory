@@ -1,0 +1,6 @@
+name: file-upload-download
+runtime:
+  name: nodejs
+  options:
+    typescript: true
+description: Infrastructure for large file upload/download service

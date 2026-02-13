@@ -1,0 +1,21 @@
+{
+  "name": "@lab/file-upload-infra",
+  "version": "1.0.0",
+  "description": "Infrastructure for file upload/download service",
+  "main": "index.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": ["pulumi", "infrastructure"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@pulumi/pulumi": "^3.100.0",
+    "@pulumi/aws": "^6.15.0",
+    "@lab/pulumi-components": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3"
+  }
+}
