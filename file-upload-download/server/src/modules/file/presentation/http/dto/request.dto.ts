@@ -6,7 +6,8 @@ export class GetUploadUrlRequest {
   fileName: string;
 
   @IsString()
-  contentType: string;
+  @IsOptional()
+  contentType?: string;
 
   @IsOptional()
   @IsNumber()

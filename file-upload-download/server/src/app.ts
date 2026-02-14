@@ -1,40 +1,54 @@
+import 'dotenv/config';
 import 'reflect-metadata';
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction, Express } from 'express';
+import { initConfigModule } from './config/config.module';
+import { initFileModule } from './modules/file';
 import { fileRouter } from './modules/file/presentation/http/routes/file.routes';
 import { ValidationFailedError } from './shared/errors/validation.error';
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+export function createApp(): Express {
+  // 모듈 초기화 (순서 중요)
+  initConfigModule();
+  initFileModule();
 
-app.use(express.json());
+  const app = express();
 
-// Routes
-app.use('/api/files', fileRouter);
+  app.use(express.json());
 
-// Health check
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
-});
+  // Routes
+  app.use('/api/files', fileRouter);
 
-// Error handler
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error(err);
+  // Health check
+  app.get('/health', (req, res) => {
+    res.json({ status: 'ok' });
+  });
 
-  if (err instanceof ValidationFailedError) {
-    return res.status(400).json({
-      error: 'Validation Failed',
+  // Error handler
+  app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    console.error(err);
+
+    if (err instanceof ValidationFailedError) {
+      return res.status(400).json({
+        error: 'Validation Failed',
+        message: err.message,
+      });
+    }
+
+    res.status(500).json({
+      error: 'Internal Server Error',
       message: err.message,
     });
-  }
-
-  res.status(500).json({
-    error: 'Internal Server Error',
-    message: err.message,
   });
-});
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+  return app;
+}
 
-export default app;
+// 로컬 실행 시
+if (process.env.NODE_ENV !== 'lambda') {
+  const PORT = process.env.PORT || 3000;
+  const app = createApp();
+
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}

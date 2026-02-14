@@ -1,0 +1,68 @@
+service: file-upload-download
+
+plugins:
+  - serverless-offline
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'ap-northeast-2'}
+  ecr:
+    images:
+      file-upload-app:
+        uri: ${env:ECR_IMAGE_URI}
+      platform: linux/arm64
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:PutObjectAcl
+            - s3:GetObject
+            - s3:AbortMultipartUpload
+            - s3:ListMultipartUploadParts
+            - s3:ListBucket
+          Resource:
+            - arn:aws:s3:::${self:custom.bucketName}
+            - arn:aws:s3:::${self:custom.bucketName}/*
+
+custom:
+  # Pulumi에서 생성한 버킷 이름과 일치: file-upload-${environment}-${stack}
+  bucketName: file-upload-${self:provider.stage}-${self:provider.stage}
+
+functions:
+  main:
+    image:
+      name: file-upload-app
+      command:
+        - 'dist/main.handler'
+    timeout: 30
+    memorySize: 512
+    url: true
+    environment:
+      UPLOAD_BUCKET: ${self:custom.bucketName}
+      ENVIRONMENT: ${self:provider.stage}
+    events:
+      - httpApi:
+          method: ANY
+          path: /
+      - httpApi:
+          method: ANY
+          path: /{proxy+}
+
+package:
+  patterns:
+    - 'dist/**'
+    - 'node_modules/**'
+    - '!src/**'
+    - '!test/**'
+    - '!*.ts'
+    - '!tsconfig*.json'
+    - '!jest.config.*'
+    - '!.eslintrc.*'
+    - '!node_modules/.cache/**'
+    - '!node_modules/**/*.md'

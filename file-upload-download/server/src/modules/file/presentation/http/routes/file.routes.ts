@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
-import { fileController } from '../../../index';
+import { getFileController } from '../../../index';
 import {
   GetUploadUrlRequest,
   GetDownloadUrlRequest,
@@ -25,7 +25,7 @@ fileRouter.get(
       throw new ValidationFailedError(errors.map((e) => Object.values(e.constraints || {}).join(', ')).join('; '));
     }
 
-    const result = await fileController.getUploadUrl(param);
+    const result = await getFileController().getUploadUrl(param);
     res.json(result);
   }),
 );
@@ -43,7 +43,7 @@ fileRouter.get(
       throw new ValidationFailedError(errors.map((e) => Object.values(e.constraints || {}).join(', ')).join('; '));
     }
 
-    const result = await fileController.getDownloadUrl(param);
+    const result = await getFileController().getDownloadUrl(param);
     res.json(result);
   }),
 );
@@ -58,7 +58,7 @@ fileRouter.post(
       throw new ValidationFailedError(errors.map((e) => Object.values(e.constraints || {}).join(', ')).join('; '));
     }
 
-    const result = await fileController.initiateMultipartUpload(body);
+    const result = await getFileController().initiateMultipartUpload(body);
     res.json(result);
   }),
 );
@@ -78,7 +78,7 @@ fileRouter.get(
       throw new ValidationFailedError(errors.map((e) => Object.values(e.constraints || {}).join(', ')).join('; '));
     }
 
-    const result = await fileController.getMultipartUploadUrl(param);
+    const result = await getFileController().getMultipartUploadUrl(param);
     res.json(result);
   }),
 );
@@ -93,7 +93,7 @@ fileRouter.post(
       throw new ValidationFailedError(errors.map((e) => Object.values(e.constraints || {}).join(', ')).join('; '));
     }
 
-    await fileController.completeMultipartUpload(body);
+    await getFileController().completeMultipartUpload(body);
     res.json({ success: true });
   }),
 );
@@ -108,7 +108,7 @@ fileRouter.post(
       throw new ValidationFailedError(errors.map((e) => Object.values(e.constraints || {}).join(', ')).join('; '));
     }
 
-    await fileController.abortMultipartUpload(body);
+    await getFileController().abortMultipartUpload(body);
     res.json({ success: true });
   }),
 );
