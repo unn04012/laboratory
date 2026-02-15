@@ -13,6 +13,8 @@ export function createApp(): Express {
 
   const app = express();
 
+  // JSON 파싱은 특정 라우트에만 적용 (스트림 업로드 라우트 제외)
+  // 또는 전체 적용 후 스트림 라우트만 express.raw() 사용
   app.use(express.json());
 
   // Routes

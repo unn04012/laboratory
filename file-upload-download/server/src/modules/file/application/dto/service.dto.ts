@@ -59,3 +59,16 @@ export class AbortMultipartUploadCommand {
   fileKey: string;
   uploadId: string;
 }
+
+// Stream Upload DTOs
+export class UploadStreamCommand {
+  fileName: string;
+  contentType: string;
+  stream: NodeJS.ReadableStream;
+}
+
+export class UploadStreamResult {
+  fileKey: string;
+  etag?: string;
+  versionId?: string;
+}

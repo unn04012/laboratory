@@ -112,3 +112,34 @@ fileRouter.post(
     res.json({ success: true });
   }),
 );
+
+// Stream Upload - Binary (Postman Binary Upload)
+fileRouter.post(
+  '/uploads/binary',
+  wrapAsync(async (req, res) => {
+    const fileName = req.query.fileName as string;
+    const contentType = req.headers['content-type'] || 'application/octet-stream';
+    console.log(fileName);
+    if (!fileName) {
+      throw new ValidationFailedError('fileName query parameter is required');
+    }
+
+    const result = await getFileController().uploadStreamBinary(req, fileName, contentType);
+    res.json(result);
+  }),
+);
+
+// Stream Upload - Busboy (Multipart Form-Data)
+fileRouter.post(
+  '/uploads/form-data',
+  wrapAsync(async (req, res) => {
+    // Content-Type이 multipart/form-data인지 확인
+    const contentType = req.headers['content-type'] || '';
+    if (!contentType.includes('multipart/form-data')) {
+      throw new ValidationFailedError('Content-Type must be multipart/form-data');
+    }
+
+    const result = await getFileController().uploadStreamBusboy(req);
+    res.json(result);
+  }),
+);

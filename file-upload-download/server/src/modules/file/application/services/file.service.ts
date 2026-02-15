@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { Readable } from 'stream';
 import { IFileStorageRepository } from '../../domain/repositories/file-storage.repository.interface';
 import {
   GetUploadUrlCommand,
@@ -11,6 +12,8 @@ import {
   GetMultipartUploadUrlResult,
   CompleteMultipartUploadCommand,
   AbortMultipartUploadCommand,
+  UploadStreamCommand,
+  UploadStreamResult,
 } from '../dto/service.dto';
 
 export class FileService {
@@ -77,6 +80,23 @@ export class FileService {
   async abortMultipartUpload(command: AbortMultipartUploadCommand): Promise<void> {
     const { fileKey, uploadId } = command;
     await this.fileStorageRepository.abortMultipartUpload(fileKey, uploadId);
+  }
+
+  async uploadStream(command: UploadStreamCommand): Promise<UploadStreamResult> {
+    const { fileName, contentType, stream } = command;
+    const fileKey = this.generateFileKey(fileName);
+
+    const result = await this.fileStorageRepository.uploadStream(
+      fileKey,
+      stream as Readable,
+      contentType,
+    );
+
+    return {
+      fileKey: result.key,
+      etag: result.etag,
+      versionId: result.versionId,
+    };
   }
 
   private generateFileKey(fileName: string): string {
