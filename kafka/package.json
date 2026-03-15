@@ -1,0 +1,9 @@
+{
+  "name": "@lab/kafka",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start:producer": "cd kafka-producer && npm run start:dev",
+    "start:consumer": "cd kafka-consumer && npm run start:dev"
+  }
+}
